@@ -1,36 +1,43 @@
 /**
  * Sticky Header CSS
- * Structural CSS with CSS custom properties for dynamic values
+ * position:fixed + height are applied via inline style by JS.
+ * CSS handles transitions and state-based visual changes only.
  */
 
-/* --- Base Sticky State ---
-   position: fixed is applied via inline style by JS (_applyFixedPosition)
-   matching Elementor PRO sticky approach for header location compatibility */
+/* ── Base sticky state ──────────────────────────────────────── */
 .mk-em-is-sticky {
+	box-sizing: border-box;
 	z-index: var(--mk-em-z-index, 999);
+	/* height is set inline by JS — declare transition here so it
+	   applies in BOTH directions (scroll down AND scroll up) */
 	transition:
-		min-height var(--mk-em-transition-duration, 300ms) cubic-bezier(0.4, 0, 0.2, 1),
-		padding-top var(--mk-em-transition-duration, 300ms) cubic-bezier(0.4, 0, 0.2, 1),
-		padding-bottom var(--mk-em-transition-duration, 300ms) cubic-bezier(0.4, 0, 0.2, 1),
-		background-color var(--mk-em-transition-duration, 300ms) ease,
-		box-shadow var(--mk-em-transition-duration, 300ms) ease;
+		height              var(--mk-em-transition-duration, 300ms) cubic-bezier(0.4, 0, 0.2, 1),
+		background-color    var(--mk-em-transition-duration, 300ms) ease,
+		box-shadow          var(--mk-em-transition-duration, 300ms) ease;
 }
 
-/* --- Scrolled State --- */
+/* ── Scrolled state ─────────────────────────────────────────── */
 .elementor-element.mk-em-is-sticky.mk-em-is-scrolled {
-	min-height: var(--mk-em-min-height, 60px);
-	--padding-block-start: var(--mk-em-shrink-padding-top, 8px);
-	--padding-block-end: var(--mk-em-shrink-padding-bottom, 8px);
 	background-color: var(--mk-em-scrolled-bg, transparent);
 }
 
-/* --- Logo Fallback (scale only, when no scrolled logo) --- */
-.mk-em-is-sticky.mk-em-is-scrolled .elementor-widget-image img:not(.mk-em-logo-scrolled) {
-	transform: scale(var(--mk-em-logo-scale, 0.75));
-	transition: transform var(--mk-em-transition-duration, 300ms) ease;
+.mk-em-is-sticky.mk-em-is-scrolled.mk-em-has-shadow {
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
 }
 
-/* --- Logo Wrapper --- */
+/* ── Logo shrink target ─────────────────────────────────────── */
+/* Transition declared on BASE state so the reverse (scroll up)
+   also animates — not just the forward direction */
+.mk-em-is-sticky .mk-em-shrink-target {
+	transition: transform var(--mk-em-transition-duration, 300ms) cubic-bezier(0.4, 0, 0.2, 1);
+	transform-origin: left center;
+}
+
+.mk-em-is-sticky.mk-em-is-scrolled .mk-em-shrink-target {
+	transform: scale(var(--mk-em-logo-scale, 0.75));
+}
+
+/* ── Logo swap wrapper ──────────────────────────────────────── */
 .mk-em-logo-wrapper {
 	position: relative;
 	display: inline-block;
@@ -40,7 +47,7 @@
 .mk-em-logo-scrolled {
 	display: block;
 	transition:
-		opacity var(--mk-em-transition-duration, 300ms) ease,
+		opacity   var(--mk-em-transition-duration, 300ms) ease,
 		transform var(--mk-em-transition-duration, 300ms) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -52,66 +59,20 @@
 	height: 100%;
 }
 
-/* --- Animation: Fade --- */
-.mk-em-logo-anim-fade .mk-em-logo-default {
-	opacity: 1;
-}
+/* Fade */
+.mk-em-logo-anim-fade .mk-em-logo-default  { opacity: 1; }
+.mk-em-logo-anim-fade .mk-em-logo-scrolled { opacity: 0; }
+.mk-em-is-scrolled .mk-em-logo-anim-fade .mk-em-logo-default  { opacity: 0; }
+.mk-em-is-scrolled .mk-em-logo-anim-fade .mk-em-logo-scrolled { opacity: 1; }
 
-.mk-em-logo-anim-fade .mk-em-logo-scrolled {
-	opacity: 0;
-}
+/* Shrink */
+.mk-em-logo-anim-shrink .mk-em-logo-default  { opacity: 1; transform: scale(1); }
+.mk-em-logo-anim-shrink .mk-em-logo-scrolled { opacity: 0; transform: scale(0.6); }
+.mk-em-is-scrolled .mk-em-logo-anim-shrink .mk-em-logo-default  { opacity: 0; transform: scale(0.75); }
+.mk-em-is-scrolled .mk-em-logo-anim-shrink .mk-em-logo-scrolled { opacity: 1; transform: scale(1); }
 
-.mk-em-is-scrolled .mk-em-logo-anim-fade .mk-em-logo-default {
-	opacity: 0;
-}
-
-.mk-em-is-scrolled .mk-em-logo-anim-fade .mk-em-logo-scrolled {
-	opacity: 1;
-}
-
-/* --- Animation: Shrink --- */
-.mk-em-logo-anim-shrink .mk-em-logo-default {
-	opacity: 1;
-	transform: scale(1);
-}
-
-.mk-em-logo-anim-shrink .mk-em-logo-scrolled {
-	opacity: 0;
-	transform: scale(0.6);
-}
-
-.mk-em-is-scrolled .mk-em-logo-anim-shrink .mk-em-logo-default {
-	opacity: 0;
-	transform: scale(var(--mk-em-logo-scale, 0.75));
-}
-
-.mk-em-is-scrolled .mk-em-logo-anim-shrink .mk-em-logo-scrolled {
-	opacity: 1;
-	transform: scale(1);
-}
-
-/* --- Animation: Fade + Shrink --- */
-.mk-em-logo-anim-fade-shrink .mk-em-logo-default {
-	opacity: 1;
-	transform: scale(1);
-}
-
-.mk-em-logo-anim-fade-shrink .mk-em-logo-scrolled {
-	opacity: 0;
-	transform: scale(0.8) translateY(6px);
-}
-
-.mk-em-is-scrolled .mk-em-logo-anim-fade-shrink .mk-em-logo-default {
-	opacity: 0;
-	transform: scale(0.8) translateY(-6px);
-}
-
-.mk-em-is-scrolled .mk-em-logo-anim-fade-shrink .mk-em-logo-scrolled {
-	opacity: 1;
-	transform: scale(1) translateY(0);
-}
-
-/* --- Box Shadow --- */
-.mk-em-is-sticky.mk-em-is-scrolled.mk-em-has-shadow {
-	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
-}
+/* Fade + Shrink */
+.mk-em-logo-anim-fade-shrink .mk-em-logo-default  { opacity: 1; transform: scale(1); }
+.mk-em-logo-anim-fade-shrink .mk-em-logo-scrolled { opacity: 0; transform: scale(0.8) translateY(6px); }
+.mk-em-is-scrolled .mk-em-logo-anim-fade-shrink .mk-em-logo-default  { opacity: 0; transform: scale(0.8) translateY(-6px); }
+.mk-em-is-scrolled .mk-em-logo-anim-fade-shrink .mk-em-logo-scrolled { opacity: 1; transform: scale(1) translateY(0); }

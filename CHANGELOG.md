@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-03-17
+
+### Changed
+- Replaced `min-height` + padding controls with explicit **Starting Height** and **Sticky Height** sliders — height is now set inline via JS enabling reliable CSS transitions in both directions
+- Replaced fixed `.elementor-widget-image` logo target with a **Logo CSS Class** text control, supporting any widget, image, or container element
+- Removed padding controls (`shrink_padding_top`, `shrink_padding_bottom`) — height now drives the shrink effect directly
+- Renamed `mk_em_shrink_logo_scale` → `mk_em_logo_scale`
+- Logo Swap Animation control now only shows when an alternate logo is set
+
+### Fixed
+- Container height not shrinking on scroll — height transition now works properly with explicit pixel values on both states
+- Logo scale animation not reverting on scroll-up — `transition` is now declared on the base state (`.mk-em-is-sticky .mk-em-shrink-target`) so both directions animate
+- `transform-origin: left center` on shrink target for natural logo scaling
+
 ## [0.1.2] - 2026-03-17
 
 ### Added

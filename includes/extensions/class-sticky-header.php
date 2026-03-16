@@ -16,22 +16,14 @@ class Sticky_Header {
 
 	const SECTION_ID = 'mk_em_sticky_header_section';
 
-	/**
-	 * Constructor
-	 */
 	public function __construct() {
-		// Inject controls into the container's Advanced tab
 		add_action(
 			'elementor/element/container/section_effects/after_section_end',
 			[ $this, 'register_controls' ]
 		);
 	}
 
-	/**
-	 * Register controls
-	 */
 	public function register_controls( Element_Base $element ) {
-		// Guard: Check if Container element exists
 		if ( ! \Elementor\Plugin::$instance->experiments->is_feature_active( 'container' ) ) {
 			return;
 		}
@@ -44,232 +36,209 @@ class Sticky_Header {
 			]
 		);
 
-		// --- Enable Toggle ---
+		// ── Enable ───────────────────────────────────────────────
 		$element->add_control(
 			'mk_em_sticky_enable',
 			[
-				'label'       => esc_html__( 'Enable Sticky Header', 'mk-elementor-menu' ),
-				'type'        => Controls_Manager::SWITCHER,
-				'return_value' => 'yes',
-				'default'     => '',
-				'render_type' => 'none',
+				'label'              => esc_html__( 'Enable Sticky Header', 'mk-elementor-menu' ),
+				'type'               => Controls_Manager::SWITCHER,
+				'return_value'       => 'yes',
+				'default'            => '',
+				'render_type'        => 'none',
 				'frontend_available' => true,
 			]
 		);
 
-		// --- Scroll Threshold ---
+		// ── Behaviour ────────────────────────────────────────────
+		$element->add_control(
+			'mk_em_divider_behaviour',
+			[
+				'type'      => Controls_Manager::DIVIDER,
+				'condition' => [ 'mk_em_sticky_enable' => 'yes' ],
+			]
+		);
+
 		$element->add_control(
 			'mk_em_scroll_threshold',
 			[
-				'label'       => esc_html__( 'Scroll Threshold (px)', 'mk-elementor-menu' ),
-				'type'        => Controls_Manager::NUMBER,
-				'default'     => 80,
-				'min'         => 0,
-				'max'         => 500,
-				'condition'   => [ 'mk_em_sticky_enable' => 'yes' ],
-				'render_type' => 'none',
+				'label'              => esc_html__( 'Scroll Threshold (px)', 'mk-elementor-menu' ),
+				'type'               => Controls_Manager::NUMBER,
+				'default'            => 80,
+				'min'                => 0,
+				'max'                => 500,
+				'description'        => esc_html__( 'How many pixels to scroll before shrinking.', 'mk-elementor-menu' ),
+				'condition'          => [ 'mk_em_sticky_enable' => 'yes' ],
+				'render_type'        => 'none',
 				'frontend_available' => true,
 			]
 		);
 
-		// --- Transition Duration ---
 		$element->add_control(
 			'mk_em_transition_duration',
 			[
-				'label'       => esc_html__( 'Transition Duration (ms)', 'mk-elementor-menu' ),
-				'type'        => Controls_Manager::SLIDER,
-				'default'     => [ 'size' => 300 ],
-				'range'       => [
-					'px' => [
-						'min'  => 0,
-						'max'  => 1000,
-						'step' => 50,
-					],
-				],
-				'condition'   => [ 'mk_em_sticky_enable' => 'yes' ],
-				'selectors'   => [
-					'{{WRAPPER}}' => '--mk-em-transition-duration: {{SIZE}}ms;',
-				],
+				'label'     => esc_html__( 'Transition Duration (ms)', 'mk-elementor-menu' ),
+				'type'      => Controls_Manager::SLIDER,
+				'default'   => [ 'size' => 300 ],
+				'range'     => [ 'px' => [ 'min' => 0, 'max' => 1000, 'step' => 50 ] ],
+				'condition' => [ 'mk_em_sticky_enable' => 'yes' ],
+				'selectors' => [ '{{WRAPPER}}' => '--mk-em-transition-duration: {{SIZE}}ms;' ],
 			]
 		);
 
-		// --- Separator ---
+		// ── Height ───────────────────────────────────────────────
 		$element->add_control(
-			'mk_em_shrink_divider',
+			'mk_em_divider_height',
 			[
 				'type'      => Controls_Manager::DIVIDER,
 				'condition' => [ 'mk_em_sticky_enable' => 'yes' ],
 			]
 		);
 
-		// --- Min Height ---
 		$element->add_control(
-			'mk_em_shrink_min_height',
+			'mk_em_initial_height',
 			[
-				'label'       => esc_html__( 'Min Height (scrolled)', 'mk-elementor-menu' ),
-				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => [ 'px', 'vh' ],
-				'default'     => [ 'unit' => 'px', 'size' => 60 ],
-				'range'       => [
-					'px' => [ 'min' => 20, 'max' => 300 ],
-					'vh' => [ 'min' => 5, 'max' => 50 ],
+				'label'              => esc_html__( 'Starting Height', 'mk-elementor-menu' ),
+				'type'               => Controls_Manager::SLIDER,
+				'size_units'         => [ 'px', 'vh' ],
+				'default'            => [ 'unit' => 'px', 'size' => 100 ],
+				'range'              => [
+					'px' => [ 'min' => 40, 'max' => 400 ],
+					'vh' => [ 'min' => 5,  'max' => 50  ],
 				],
-				'condition'   => [ 'mk_em_sticky_enable' => 'yes' ],
-				'selectors'   => [
-					'{{WRAPPER}}' => '--mk-em-min-height: {{SIZE}}{{UNIT}};',
-				],
-			]
-		);
-
-		// --- Padding Top ---
-		$element->add_control(
-			'mk_em_shrink_padding_top',
-			[
-				'label'       => esc_html__( 'Padding Top (scrolled)', 'mk-elementor-menu' ),
-				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => [ 'px', 'em', 'rem' ],
-				'default'     => [ 'unit' => 'px', 'size' => 8 ],
-				'range'       => [
-					'px'  => [ 'min' => 0, 'max' => 50 ],
-					'em'  => [ 'min' => 0, 'max' => 3, 'step' => 0.1 ],
-					'rem' => [ 'min' => 0, 'max' => 3, 'step' => 0.1 ],
-				],
-				'condition'   => [ 'mk_em_sticky_enable' => 'yes' ],
-				'selectors'   => [
-					'{{WRAPPER}}' => '--mk-em-shrink-padding-top: {{SIZE}}{{UNIT}};',
-				],
-			]
-		);
-
-		// --- Padding Bottom ---
-		$element->add_control(
-			'mk_em_shrink_padding_bottom',
-			[
-				'label'       => esc_html__( 'Padding Bottom (scrolled)', 'mk-elementor-menu' ),
-				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => [ 'px', 'em', 'rem' ],
-				'default'     => [ 'unit' => 'px', 'size' => 8 ],
-				'range'       => [
-					'px'  => [ 'min' => 0, 'max' => 50 ],
-					'em'  => [ 'min' => 0, 'max' => 3, 'step' => 0.1 ],
-					'rem' => [ 'min' => 0, 'max' => 3, 'step' => 0.1 ],
-				],
-				'condition'   => [ 'mk_em_sticky_enable' => 'yes' ],
-				'selectors'   => [
-					'{{WRAPPER}}' => '--mk-em-shrink-padding-bottom: {{SIZE}}{{UNIT}};',
-				],
-			]
-		);
-
-		// --- Logo Scale (fallback when no scrolled logo) ---
-		$element->add_control(
-			'mk_em_shrink_logo_scale',
-			[
-				'label'       => esc_html__( 'Logo Scale (scrolled)', 'mk-elementor-menu' ),
-				'type'        => Controls_Manager::SLIDER,
-				'default'     => [ 'size' => 0.75 ],
-				'range'       => [
-					'px' => [
-						'min'  => 0.3,
-						'max'  => 1,
-						'step' => 0.05,
-					],
-				],
-				'condition'   => [ 'mk_em_sticky_enable' => 'yes' ],
-				'selectors'   => [
-					'{{WRAPPER}}' => '--mk-em-logo-scale: {{SIZE}};',
-				],
-			]
-		);
-
-		// --- Separator ---
-		$element->add_control(
-			'mk_em_logo_divider',
-			[
-				'type'      => Controls_Manager::DIVIDER,
-				'condition' => [ 'mk_em_sticky_enable' => 'yes' ],
-			]
-		);
-
-		// --- Scrolled Logo Image ---
-		$element->add_control(
-			'mk_em_scrolled_logo',
-			[
-				'label'       => esc_html__( 'Scrolled Logo (Alternate)', 'mk-elementor-menu' ),
-				'type'        => Controls_Manager::MEDIA,
-				'default'     => [ 'url' => '' ],
-				'condition'   => [ 'mk_em_sticky_enable' => 'yes' ],
-				'render_type' => 'none',
+				'description'        => esc_html__( 'Container height before scrolling.', 'mk-elementor-menu' ),
+				'condition'          => [ 'mk_em_sticky_enable' => 'yes' ],
+				'render_type'        => 'none',
 				'frontend_available' => true,
 			]
 		);
 
-		// --- Logo Animation Type ---
+		$element->add_control(
+			'mk_em_sticky_height',
+			[
+				'label'              => esc_html__( 'Sticky Height', 'mk-elementor-menu' ),
+				'type'               => Controls_Manager::SLIDER,
+				'size_units'         => [ 'px', 'vh' ],
+				'default'            => [ 'unit' => 'px', 'size' => 60 ],
+				'range'              => [
+					'px' => [ 'min' => 20, 'max' => 300 ],
+					'vh' => [ 'min' => 3,  'max' => 30  ],
+				],
+				'description'        => esc_html__( 'Container height after scrolling past the threshold.', 'mk-elementor-menu' ),
+				'condition'          => [ 'mk_em_sticky_enable' => 'yes' ],
+				'render_type'        => 'none',
+				'frontend_available' => true,
+			]
+		);
+
+		// ── Logo ─────────────────────────────────────────────────
+		$element->add_control(
+			'mk_em_divider_logo',
+			[
+				'type'      => Controls_Manager::DIVIDER,
+				'condition' => [ 'mk_em_sticky_enable' => 'yes' ],
+			]
+		);
+
+		$element->add_control(
+			'mk_em_logo_selector',
+			[
+				'label'              => esc_html__( 'Logo CSS Class', 'mk-elementor-menu' ),
+				'type'               => Controls_Manager::TEXT,
+				'placeholder'        => 'e.g. my-logo',
+				'description'        => esc_html__( 'CSS class (without dot) on the logo widget, image widget or container to scale on scroll.', 'mk-elementor-menu' ),
+				'condition'          => [ 'mk_em_sticky_enable' => 'yes' ],
+				'render_type'        => 'none',
+				'frontend_available' => true,
+			]
+		);
+
+		$element->add_control(
+			'mk_em_logo_scale',
+			[
+				'label'     => esc_html__( 'Logo Scale (scrolled)', 'mk-elementor-menu' ),
+				'type'      => Controls_Manager::SLIDER,
+				'default'   => [ 'size' => 0.75 ],
+				'range'     => [ 'px' => [ 'min' => 0.3, 'max' => 1, 'step' => 0.05 ] ],
+				'condition' => [ 'mk_em_sticky_enable' => 'yes' ],
+				'selectors' => [ '{{WRAPPER}}' => '--mk-em-logo-scale: {{SIZE}};' ],
+			]
+		);
+
+		$element->add_control(
+			'mk_em_scrolled_logo',
+			[
+				'label'              => esc_html__( 'Alternate Logo (scrolled)', 'mk-elementor-menu' ),
+				'type'               => Controls_Manager::MEDIA,
+				'default'            => [ 'url' => '' ],
+				'description'        => esc_html__( 'Optional: swap to a different logo when scrolled.', 'mk-elementor-menu' ),
+				'condition'          => [ 'mk_em_sticky_enable' => 'yes' ],
+				'render_type'        => 'none',
+				'frontend_available' => true,
+			]
+		);
+
 		$element->add_control(
 			'mk_em_logo_animation',
 			[
-				'label'       => esc_html__( 'Logo Animation', 'mk-elementor-menu' ),
-				'type'        => Controls_Manager::SELECT,
-				'options'     => [
+				'label'              => esc_html__( 'Logo Swap Animation', 'mk-elementor-menu' ),
+				'type'               => Controls_Manager::SELECT,
+				'options'            => [
 					'fade'        => esc_html__( 'Fade', 'mk-elementor-menu' ),
 					'shrink'      => esc_html__( 'Shrink', 'mk-elementor-menu' ),
 					'fade-shrink' => esc_html__( 'Fade + Shrink', 'mk-elementor-menu' ),
 				],
-				'default'     => 'fade',
-				'condition'   => [ 'mk_em_sticky_enable' => 'yes' ],
-				'render_type' => 'none',
+				'default'            => 'fade',
+				'condition'          => [
+					'mk_em_sticky_enable'  => 'yes',
+					'mk_em_scrolled_logo!' => '',
+				],
+				'render_type'        => 'none',
 				'frontend_available' => true,
 			]
 		);
 
-		// --- Separator ---
+		// ── Appearance ───────────────────────────────────────────
 		$element->add_control(
-			'mk_em_bg_divider',
+			'mk_em_divider_appearance',
 			[
 				'type'      => Controls_Manager::DIVIDER,
 				'condition' => [ 'mk_em_sticky_enable' => 'yes' ],
 			]
 		);
 
-		// --- Scrolled Background Color ---
 		$element->add_control(
 			'mk_em_scrolled_bg_color',
 			[
-				'label'       => esc_html__( 'Background Color (scrolled)', 'mk-elementor-menu' ),
-				'type'        => Controls_Manager::COLOR,
-				'default'     => '#ffffff',
-				'condition'   => [ 'mk_em_sticky_enable' => 'yes' ],
-				'selectors'   => [
-					'{{WRAPPER}}' => '--mk-em-scrolled-bg: {{VALUE}};',
-				],
+				'label'     => esc_html__( 'Background Color (scrolled)', 'mk-elementor-menu' ),
+				'type'      => Controls_Manager::COLOR,
+				'default'   => '#ffffff',
+				'condition' => [ 'mk_em_sticky_enable' => 'yes' ],
+				'selectors' => [ '{{WRAPPER}}' => '--mk-em-scrolled-bg: {{VALUE}};' ],
 			]
 		);
 
-		// --- Box Shadow ---
 		$element->add_control(
 			'mk_em_scrolled_box_shadow',
 			[
-				'label'       => esc_html__( 'Enable Box Shadow (scrolled)', 'mk-elementor-menu' ),
-				'type'        => Controls_Manager::SWITCHER,
-				'return_value' => 'yes',
-				'default'     => '',
-				'condition'   => [ 'mk_em_sticky_enable' => 'yes' ],
-				'render_type' => 'none',
+				'label'              => esc_html__( 'Box Shadow (scrolled)', 'mk-elementor-menu' ),
+				'type'               => Controls_Manager::SWITCHER,
+				'return_value'       => 'yes',
+				'default'            => '',
+				'condition'          => [ 'mk_em_sticky_enable' => 'yes' ],
+				'render_type'        => 'none',
 				'frontend_available' => true,
 			]
 		);
 
-		// --- Z-Index ---
 		$element->add_control(
 			'mk_em_z_index',
 			[
-				'label'       => esc_html__( 'Z-Index', 'mk-elementor-menu' ),
-				'type'        => Controls_Manager::NUMBER,
-				'default'     => 999,
-				'condition'   => [ 'mk_em_sticky_enable' => 'yes' ],
-				'selectors'   => [
-					'{{WRAPPER}}' => '--mk-em-z-index: {{VALUE}};',
-				],
+				'label'              => esc_html__( 'Z-Index', 'mk-elementor-menu' ),
+				'type'               => Controls_Manager::NUMBER,
+				'default'            => 999,
+				'condition'          => [ 'mk_em_sticky_enable' => 'yes' ],
+				'render_type'        => 'none',
+				'frontend_available' => true,
 			]
 		);
 

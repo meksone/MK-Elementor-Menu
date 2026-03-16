@@ -1,36 +1,56 @@
 /**
  * Sticky Header Handler - vanilla JS, no jQuery
- * v0.1.1 - Switch to position:fixed + DOM scanning (hook was never firing)
+ * v0.1.3
  */
 (function() {
 	'use strict';
 
 	class StickyHeaderHandler {
 		constructor(element, settings) {
-			this.element   = element;
-			this.settings  = settings;
-			this.observer  = null;
-			this.sentinel  = null;
-			this.logoWrapper = null;
-			this.spacer    = null;
-			this.originalHeight = 0;
+			this.element        = element;
+			this.settings       = settings;
+			this.observer       = null;
+			this.sentinel       = null;
+			this.logoWrapper    = null;
+			this.spacer         = null;
+			this.shrinkTargets  = [];
+			this.initialHeight  = null;
+			this.stickyHeight   = null;
 			this.init();
 		}
 
-		init() {
-			// Record height before any changes
-			this.originalHeight = this.element.offsetHeight;
+		// ── Helpers ───────────────────────────────────────────────
 
-			// Apply position: fixed with calculated dimensions (mirrors Elementor PRO sticky)
+		/**
+		 * Parse a slider setting {size, unit} into a CSS string e.g. "100px".
+		 * Returns null if setting is empty or size is 0.
+		 */
+		_parseSlideSetting(setting) {
+			if (!setting || !setting.size) return null;
+			return setting.size + (setting.unit || 'px');
+		}
+
+		// ── Init ──────────────────────────────────────────────────
+
+		init() {
+			// Resolve heights
+			this.initialHeight = this._parseSlideSetting(this.settings.mk_em_initial_height)
+				|| (this.element.offsetHeight + 'px');
+			this.stickyHeight  = this._parseSlideSetting(this.settings.mk_em_sticky_height) || '60px';
+
+			// Apply fixed positioning (mirrors Elementor PRO sticky for header location compatibility)
 			this._applyFixedPosition();
 
-			// Create spacer to fill the gap left by fixed positioning
+			// Spacer fills the layout gap left by fixed positioning
 			this._createSpacer();
 
-			// Add sticky class (enables transitions + scrolled-state CSS)
+			// Mark element
 			this.element.classList.add('mk-em-is-sticky');
 
-			// Setup logo swap if alternate logo is configured
+			// Find and mark the logo shrink target(s)
+			this._setupShrinkTargets();
+
+			// Logo swap (alternate image on scroll)
 			if (this.settings.mk_em_scrolled_logo && this.settings.mk_em_scrolled_logo.url) {
 				this._setupLogoSwap();
 			}
@@ -43,31 +63,33 @@
 			this._bindResize();
 		}
 
+		// ── Positioning ───────────────────────────────────────────
+
 		_applyFixedPosition() {
-			const rect    = this.element.getBoundingClientRect();
-			const zIndex  = parseInt(this.settings.mk_em_z_index) || 999;
+			const rect   = this.element.getBoundingClientRect();
+			const zIndex = parseInt(this.settings.mk_em_z_index) || 999;
 
 			this.element.style.position     = 'fixed';
 			this.element.style.top          = rect.top + 'px';
 			this.element.style.left         = rect.left + 'px';
 			this.element.style.width        = rect.width + 'px';
+			this.element.style.height       = this.initialHeight;
 			this.element.style.zIndex       = zIndex;
 			this.element.style.marginTop    = '0';
 			this.element.style.marginBottom = '0';
+			this.element.style.overflow     = 'hidden';
 		}
 
 		_createSpacer() {
 			this.spacer = document.createElement('div');
 			this.spacer.className = 'mk-em-sticky-spacer';
-			this.spacer.style.height = this.originalHeight + 'px';
+			this.spacer.style.height = this.initialHeight;
 			this.spacer.setAttribute('aria-hidden', 'true');
-			// Insert after the container so it fills the layout gap
 			this.element.parentElement.insertBefore(this.spacer, this.element.nextSibling);
 		}
 
 		_bindResize() {
 			const recalc = () => {
-				// Recalculate from spacer position (spacer stays in normal flow)
 				if (!this.spacer) return;
 				const rect = this.spacer.getBoundingClientRect();
 				this.element.style.left  = rect.left + 'px';
@@ -82,6 +104,35 @@
 			}
 		}
 
+		// ── Logo shrink target ────────────────────────────────────
+
+		/**
+		 * Find the element(s) to shrink on scroll.
+		 * Uses the user-specified CSS class from mk_em_logo_selector.
+		 * Falls back to the first .elementor-widget-image inside the container.
+		 */
+		_setupShrinkTargets() {
+			let targets = [];
+
+			const selectorRaw = (this.settings.mk_em_logo_selector || '').trim();
+			if (selectorRaw) {
+				// Ensure leading dot
+				const selector = selectorRaw.startsWith('.') ? selectorRaw : '.' + selectorRaw;
+				targets = Array.from(this.element.querySelectorAll(selector));
+			}
+
+			// Fallback: first image widget if no class specified
+			if (!targets.length) {
+				const fallback = this.element.querySelector('.elementor-widget-image');
+				if (fallback) targets = [fallback];
+			}
+
+			targets.forEach(el => el.classList.add('mk-em-shrink-target'));
+			this.shrinkTargets = targets;
+		}
+
+		// ── Logo swap ─────────────────────────────────────────────
+
 		_setupLogoSwap() {
 			const imageWidget = this.element.querySelector('.elementor-widget-image');
 			if (!imageWidget) return;
@@ -92,14 +143,13 @@
 			const originalParent = defaultImg.parentElement;
 
 			this.logoWrapper = document.createElement('span');
-			this.logoWrapper.className = 'mk-em-logo-wrapper';
-			this.logoWrapper.classList.add('mk-em-logo-anim-' + (this.settings.mk_em_logo_animation || 'fade'));
+			this.logoWrapper.className = 'mk-em-logo-wrapper mk-em-logo-anim-' + (this.settings.mk_em_logo_animation || 'fade');
 
 			defaultImg.classList.add('mk-em-logo-default');
 
-			const scrolledImg = document.createElement('img');
-			scrolledImg.src = this.settings.mk_em_scrolled_logo.url;
-			scrolledImg.alt = defaultImg.alt;
+			const scrolledImg    = document.createElement('img');
+			scrolledImg.src      = this.settings.mk_em_scrolled_logo.url;
+			scrolledImg.alt      = defaultImg.alt;
 			scrolledImg.className = 'mk-em-logo-scrolled';
 			scrolledImg.setAttribute('aria-hidden', 'true');
 
@@ -107,6 +157,8 @@
 			this.logoWrapper.appendChild(defaultImg);
 			this.logoWrapper.appendChild(scrolledImg);
 		}
+
+		// ── Scroll detection ──────────────────────────────────────
 
 		_createSentinel() {
 			const threshold = parseInt(this.settings.mk_em_scroll_threshold) || 80;
@@ -157,9 +209,16 @@
 			}, { passive: true });
 		}
 
+		// ── State changes ─────────────────────────────────────────
+
 		_onScrolled() {
 			if (this.element.classList.contains('mk-em-is-scrolled')) return;
+
+			// Shrink height (transition is declared in CSS on .mk-em-is-sticky)
+			this.element.style.height = this.stickyHeight;
+
 			this.element.classList.add('mk-em-is-scrolled');
+
 			if (this.settings.mk_em_scrolled_box_shadow === 'yes') {
 				this.element.classList.add('mk-em-has-shadow');
 			}
@@ -167,9 +226,15 @@
 
 		_onRestored() {
 			if (!this.element.classList.contains('mk-em-is-scrolled')) return;
+
+			// Restore height (transition runs in reverse)
+			this.element.style.height = this.initialHeight;
+
 			this.element.classList.remove('mk-em-is-scrolled');
 			this.element.classList.remove('mk-em-has-shadow');
 		}
+
+		// ── Destroy ───────────────────────────────────────────────
 
 		destroy() {
 			if (this.observer) this.observer.disconnect();
@@ -177,8 +242,10 @@
 			if (this.sentinel) this.sentinel.remove();
 			if (this.spacer) this.spacer.remove();
 
+			this.shrinkTargets.forEach(el => el.classList.remove('mk-em-shrink-target'));
+
 			if (this.logoWrapper) {
-				const defaultImg = this.logoWrapper.querySelector('.mk-em-logo-default');
+				const defaultImg  = this.logoWrapper.querySelector('.mk-em-logo-default');
 				const scrolledImg = this.logoWrapper.querySelector('.mk-em-logo-scrolled');
 				if (defaultImg && scrolledImg) {
 					const wrapperParent = this.logoWrapper.parentElement;
@@ -189,25 +256,23 @@
 				}
 			}
 
-			// Reset inline styles
 			this.element.style.position     = '';
 			this.element.style.top          = '';
 			this.element.style.left         = '';
 			this.element.style.width        = '';
+			this.element.style.height       = '';
 			this.element.style.zIndex       = '';
+			this.element.style.overflow     = '';
 			this.element.style.marginTop    = '';
 			this.element.style.marginBottom = '';
 			this.element.classList.remove('mk-em-is-sticky', 'mk-em-is-scrolled', 'mk-em-has-shadow');
 		}
 	}
 
-	/**
-	 * Scan DOM for containers with our sticky controls enabled
-	 */
+	// ── Bootstrap ─────────────────────────────────────────────────
+
 	function initStickyHeaders() {
-		const containers = document.querySelectorAll('.e-con[data-settings]');
-		containers.forEach(function(container) {
-			// Skip already-initialised elements
+		document.querySelectorAll('.e-con[data-settings]').forEach(function(container) {
 			if (container.__mkEmInit) return;
 
 			let settings = {};
@@ -219,10 +284,9 @@
 
 			if (settings.mk_em_sticky_enable !== 'yes') return;
 
-			container.__mkEmInit = true;
+			container.__mkEmInit    = true;
 			container.__mkEmHandler = new StickyHeaderHandler(container, settings);
 
-			// Editor cleanup
 			container.addEventListener('elementor/destroyed', function() {
 				if (container.__mkEmHandler) {
 					container.__mkEmHandler.destroy();
@@ -232,14 +296,12 @@
 		});
 	}
 
-	// Run on DOM ready
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', initStickyHeaders);
 	} else {
 		initStickyHeaders();
 	}
 
-	// Run again after full load (catches lazy-loaded elements)
 	window.addEventListener('load', initStickyHeaders);
 
 })();
