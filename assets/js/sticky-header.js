@@ -1,6 +1,6 @@
 /**
  * Sticky Header Handler - vanilla JS, no jQuery
- * v0.1.3
+ * v0.1.4
  */
 (function() {
 	'use strict';
@@ -74,6 +74,7 @@
 			this.element.style.left         = rect.left + 'px';
 			this.element.style.width        = rect.width + 'px';
 			this.element.style.height       = this.initialHeight;
+			this.element.style.minHeight    = '0';
 			this.element.style.zIndex       = zIndex;
 			this.element.style.marginTop    = '0';
 			this.element.style.marginBottom = '0';
@@ -261,6 +262,7 @@
 			this.element.style.left         = '';
 			this.element.style.width        = '';
 			this.element.style.height       = '';
+			this.element.style.minHeight    = '';
 			this.element.style.zIndex       = '';
 			this.element.style.overflow     = '';
 			this.element.style.marginTop    = '';

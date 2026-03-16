@@ -178,6 +178,46 @@ class Sticky_Header {
 		);
 
 		$element->add_control(
+			'mk_em_scrolled_logo_width',
+			[
+				'label'      => esc_html__( 'Scrolled Logo Width', 'mk-elementor-menu' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => [ 'px', '%' ],
+				'default'    => [ 'unit' => '%', 'size' => 100 ],
+				'range'      => [
+					'px' => [ 'min' => 10, 'max' => 500 ],
+					'%'  => [ 'min' => 10, 'max' => 100 ],
+				],
+				'condition'  => [
+					'mk_em_sticky_enable'  => 'yes',
+					'mk_em_scrolled_logo!' => '',
+				],
+				'selectors'  => [ '{{WRAPPER}}' => '--mk-em-scrolled-logo-width: {{SIZE}}{{UNIT}};' ],
+			]
+		);
+
+		$element->add_control(
+			'mk_em_scrolled_logo_fit',
+			[
+				'label'     => esc_html__( 'Scrolled Logo Fit', 'mk-elementor-menu' ),
+				'type'      => Controls_Manager::SELECT,
+				'options'   => [
+					'contain'    => esc_html__( 'Contain', 'mk-elementor-menu' ),
+					'cover'      => esc_html__( 'Cover', 'mk-elementor-menu' ),
+					'fill'       => esc_html__( 'Fill', 'mk-elementor-menu' ),
+					'scale-down' => esc_html__( 'Scale Down', 'mk-elementor-menu' ),
+					'none'       => esc_html__( 'None (natural size)', 'mk-elementor-menu' ),
+				],
+				'default'   => 'contain',
+				'condition' => [
+					'mk_em_sticky_enable'  => 'yes',
+					'mk_em_scrolled_logo!' => '',
+				],
+				'selectors' => [ '{{WRAPPER}}' => '--mk-em-scrolled-logo-fit: {{VALUE}};' ],
+			]
+		);
+
+		$element->add_control(
 			'mk_em_logo_animation',
 			[
 				'label'              => esc_html__( 'Logo Swap Animation', 'mk-elementor-menu' ),

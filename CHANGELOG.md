@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2026-03-17
+
+### Fixed
+- Container height not shrinking (only expanding worked): added `min-height: 0` inline in JS so Elementor's own `min-height` on the container doesn't prevent height reduction
+
+### Added
+- **Scrolled Logo Width** slider (px/%) — control the width of the alternate logo image
+- **Scrolled Logo Fit** selector (Contain / Cover / Fill / Scale Down / None) — control `object-fit` of the alternate logo image
+
 ## [0.1.3] - 2026-03-17
 
 ### Changed
