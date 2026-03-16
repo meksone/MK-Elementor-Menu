@@ -1,0 +1,29 @@
+name: Release Plugin ZIP
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ZIP with canonical folder name
+        run: |
+          mkdir -p build/mk-elementor-menu
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='build' \
+            . build/mk-elementor-menu/
+          cd build && zip -r mk-elementor-menu.zip mk-elementor-menu/
+
+      - name: Attach ZIP to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/mk-elementor-menu.zip
