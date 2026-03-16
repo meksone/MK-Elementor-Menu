@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: MK Elementor Menu
- * Version: 0.1.0
+ * Version: 0.1.1
  * Description: Extends Elementor Container with a Sticky Header feature with customizable logo animations
  * Author: MK
  * Text Domain: mk-elementor-menu
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constants
-define( 'MK_EM_VERSION', '0.1.0' );
+define( 'MK_EM_VERSION', '0.1.1' );
 define( 'MK_EM_PATH', plugin_dir_path( __FILE__ ) );
 define( 'MK_EM_URL', plugin_dir_url( __FILE__ ) );
 

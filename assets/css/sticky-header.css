@@ -3,11 +3,10 @@
  * Structural CSS with CSS custom properties for dynamic values
  */
 
-/* --- Base Sticky State --- */
+/* --- Base Sticky State ---
+   position: fixed is applied via inline style by JS (_applyFixedPosition)
+   matching Elementor PRO sticky approach for header location compatibility */
 .mk-em-is-sticky {
-	position: sticky;
-	top: 0;
-	width: 100%;
 	z-index: var(--mk-em-z-index, 999);
 	transition:
 		min-height var(--mk-em-transition-duration, 300ms) cubic-bezier(0.4, 0, 0.2, 1),

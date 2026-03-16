@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-03-16
+
+### Fixed
+- Container invisible in Elementor header location: replaced `position: sticky` with `position: fixed` applied via inline JS (mirrors Elementor PRO sticky approach)
+- JS handler never initialised: replaced `elementorFrontend.hooks.addAction` (hook never fired) with direct DOM scanning on `DOMContentLoaded` + `window.load`
+- Added spacer div to maintain document flow when container is taken out by `position: fixed`
+- Added `ResizeObserver` to recalculate fixed width on viewport resize
+
 ## [0.1.0] - 2026-03-16
 
 ### Added
