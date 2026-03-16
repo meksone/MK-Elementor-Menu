@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-03-17
+
+### Added
+- GitHub self-updater (`includes/class-updater.php`) — new releases published via GitHub tags appear in the WordPress updates dashboard automatically
+- `CHANGELOG.html` for the WordPress update popup
+- `MK_EM_PLUGIN_SLUG`, `MK_EM_GITHUB_USER`, `MK_EM_GITHUB_REPO` constants
+
+### Fixed
+- z-index not applied: CSS variable `--mk-em-z-index` was overridden by inline styles set during fixed positioning; z-index is now set inline in JS alongside position/width
+
 ## [0.1.1] - 2026-03-16
 
 ### Fixed

@@ -44,13 +44,15 @@
 		}
 
 		_applyFixedPosition() {
-			const rect = this.element.getBoundingClientRect();
+			const rect    = this.element.getBoundingClientRect();
+			const zIndex  = parseInt(this.settings.mk_em_z_index) || 999;
 
-			this.element.style.position   = 'fixed';
-			this.element.style.top        = rect.top + 'px';
-			this.element.style.left       = rect.left + 'px';
-			this.element.style.width      = rect.width + 'px';
-			this.element.style.marginTop  = '0';
+			this.element.style.position     = 'fixed';
+			this.element.style.top          = rect.top + 'px';
+			this.element.style.left         = rect.left + 'px';
+			this.element.style.width        = rect.width + 'px';
+			this.element.style.zIndex       = zIndex;
+			this.element.style.marginTop    = '0';
 			this.element.style.marginBottom = '0';
 		}
 
@@ -188,11 +190,12 @@
 			}
 
 			// Reset inline styles
-			this.element.style.position    = '';
-			this.element.style.top         = '';
-			this.element.style.left        = '';
-			this.element.style.width       = '';
-			this.element.style.marginTop   = '';
+			this.element.style.position     = '';
+			this.element.style.top          = '';
+			this.element.style.left         = '';
+			this.element.style.width        = '';
+			this.element.style.zIndex       = '';
+			this.element.style.marginTop    = '';
 			this.element.style.marginBottom = '';
 			this.element.classList.remove('mk-em-is-sticky', 'mk-em-is-scrolled', 'mk-em-has-shadow');
 		}

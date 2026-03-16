@@ -1,0 +1,21 @@
+<h4>0.1.2 — 2026-03-17</h4>
+<ul>
+    <li><strong>Fix:</strong> z-index not applied — CSS variable was overridden by inline styles set during fixed positioning; z-index is now set inline in JS from settings value.</li>
+</ul>
+
+<h4>0.1.1 — 2026-03-16</h4>
+<ul>
+    <li><strong>Fix:</strong> Container invisible in Elementor header location — replaced <code>position:sticky</code> with <code>position:fixed</code> applied via inline JS, mirroring Elementor PRO sticky approach.</li>
+    <li><strong>Fix:</strong> JS handler never initialised — replaced <code>elementorFrontend</code> hook (never fired) with direct DOM scanning on <code>DOMContentLoaded</code> + <code>window.load</code>.</li>
+    <li><strong>Fix:</strong> Added spacer div to maintain document flow when container uses fixed positioning.</li>
+    <li><strong>Fix:</strong> Added <code>ResizeObserver</code> to recalculate fixed width on viewport resize.</li>
+</ul>
+
+<h4>0.1.0 — 2026-03-16</h4>
+<ul>
+    <li><strong>Added:</strong> Initial plugin scaffold.</li>
+    <li><strong>Added:</strong> Sticky Header extension for Elementor Container element.</li>
+    <li><strong>Added:</strong> Controls — scroll threshold, transition duration, min-height, padding, logo scale, scrolled logo image, logo animation type (fade/shrink/fade-shrink), background color, box shadow, z-index.</li>
+    <li><strong>Added:</strong> IntersectionObserver scroll detection (vanilla JS, no jQuery).</li>
+    <li><strong>Added:</strong> CSS custom property architecture for performant, smooth transitions.</li>
+</ul>

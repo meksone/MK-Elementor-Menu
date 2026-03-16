@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: MK Elementor Menu
- * Version: 0.1.1
+ * Version: 0.1.2
  * Description: Extends Elementor Container with a Sticky Header feature with customizable logo animations
  * Author: MK
  * Text Domain: mk-elementor-menu
@@ -16,9 +16,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define constants
-define( 'MK_EM_VERSION', '0.1.1' );
-define( 'MK_EM_PATH', plugin_dir_path( __FILE__ ) );
-define( 'MK_EM_URL', plugin_dir_url( __FILE__ ) );
+define( 'MK_EM_VERSION',     '0.1.2' );
+define( 'MK_EM_PATH',        plugin_dir_path( __FILE__ ) );
+define( 'MK_EM_URL',         plugin_dir_url( __FILE__ ) );
+define( 'MK_EM_PLUGIN_SLUG', 'mk-elementor-menu/mk-elementor-menu.php' );
+define( 'MK_EM_GITHUB_USER', 'meksone' );
+define( 'MK_EM_GITHUB_REPO', 'MK-Elementor-Menu' );
+
+// GitHub self-updater (admin only)
+if ( is_admin() ) {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-updater.php';
+	new MK_EM_Updater();
+}
 
 /**
  * Load plugin after Elementor is loaded
