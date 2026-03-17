@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.12] - 2026-03-17
+
+### Fixed
+- `object-fit` / `object-position` still not applying: Elementor does not reliably generate CSS for selectors targeting dynamically created child classes (`{{WRAPPER}} .mk-em-logo-scrolled`); switched to the same CSS custom-property pattern used by all other controls in this plugin — selectors now write `--mk-em-logo-fit` and `--mk-em-logo-position` onto `{{WRAPPER}}`, which Elementor definitely processes; the static CSS on `.mk-em-logo-scrolled` reads them via `var()` with the correct defaults as fallback
+
 ## [0.1.11] - 2026-03-17
 
 ### Fixed

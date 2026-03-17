@@ -218,7 +218,7 @@ class Sticky_Header {
 					'mk_em_scrolled_logo!' => '',
 				],
 				'render_type' => 'none',
-				'selectors'  => [ '{{WRAPPER}} .mk-em-logo-scrolled' => 'object-fit: {{VALUE}};' ],
+				'selectors'  => [ '{{WRAPPER}}' => '--mk-em-logo-fit: {{VALUE}};' ],
 			]
 		);
 
@@ -244,7 +244,7 @@ class Sticky_Header {
 					'mk_em_scrolled_logo!' => '',
 				],
 				'render_type' => 'none',
-				'selectors'  => [ '{{WRAPPER}} .mk-em-logo-scrolled' => 'object-position: {{VALUE}};' ],
+				'selectors'  => [ '{{WRAPPER}}' => '--mk-em-logo-position: {{VALUE}};' ],
 			]
 		);
 
