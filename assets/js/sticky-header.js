@@ -1,6 +1,6 @@
 /**
  * Sticky Header Handler - vanilla JS, no jQuery
- * v0.1.7
+ * v0.1.8
  */
 (function() {
 	'use strict';
@@ -16,16 +16,13 @@
 			this.shrinkTargets  = [];
 			this.initialHeight  = null;
 			this.stickyHeight   = null;
+			// Reliable editor detection: depends on elementor-frontend script (declared as dep)
 			this._isEditor      = !!(window.elementorFrontend && elementorFrontend.isEditMode && elementorFrontend.isEditMode());
 			this.init();
 		}
 
 		// ── Helpers ───────────────────────────────────────────────
 
-		/**
-		 * Parse a slider setting {size, unit} into a CSS string e.g. "100px".
-		 * Returns null if setting is empty or size is 0.
-		 */
 		_parseSlideSetting(setting) {
 			if (!setting || !setting.size) return null;
 			return setting.size + (setting.unit || 'px');
@@ -46,29 +43,35 @@
 			this._transitionDur = dur;
 
 			if (this._isEditor) {
-				// Editor: show the scrolled state as a static preview so the user can
-				// see background, shadow, logo swap and height in action.
-				// Do NOT apply position:fixed — that breaks the editing experience.
-				this.element.classList.add('mk-em-is-sticky', 'mk-em-is-scrolled');
-				this.element.style.height    = this.stickyHeight;
-				this.element.style.minHeight = '0';
-				this.element.style.overflow  = 'hidden';
-			} else {
-				// Frontend: full sticky behaviour
-				this._applyFixedPosition();
-				this._createSpacer();
-				this.element.classList.add('mk-em-is-sticky');
-				this._createSentinel();
-				this._bindScrollObserver();
-				this._bindResize();
+				// ── Editor mode ────────────────────────────────────
+				// Preview switch OFF: leave the container as-is (user sees normal layout).
+				// Preview switch ON:  show the scrolled state as a static snapshot so
+				//                     the user can inspect background, shadow, logo swap.
+				if (this.settings.mk_em_preview_scrolled === 'yes') {
+					this.element.classList.add('mk-em-is-sticky', 'mk-em-is-scrolled');
+					this.element.style.height    = this.stickyHeight;
+					this.element.style.minHeight = '0';
+					this.element.style.overflow  = 'hidden';
+					this._setupShrinkTargets();
+					if (this.settings.mk_em_scrolled_logo && this.settings.mk_em_scrolled_logo.url) {
+						this._setupLogoSwap();
+					}
+				}
+				// No scroll listeners or fixed positioning in editor.
+				return;
 			}
 
-			// Shrink target(s) and logo swap apply in both modes
+			// ── Frontend mode ──────────────────────────────────────
+			this._applyFixedPosition();
+			this._createSpacer();
+			this.element.classList.add('mk-em-is-sticky');
 			this._setupShrinkTargets();
-
 			if (this.settings.mk_em_scrolled_logo && this.settings.mk_em_scrolled_logo.url) {
 				this._setupLogoSwap();
 			}
+			this._createSentinel();
+			this._bindScrollObserver();
+			this._bindResize();
 		}
 
 		// ── Positioning ───────────────────────────────────────────
@@ -116,22 +119,15 @@
 
 		// ── Logo shrink target ────────────────────────────────────
 
-		/**
-		 * Find the element(s) to shrink on scroll.
-		 * Uses the user-specified CSS class from mk_em_logo_selector.
-		 * Falls back to the first .elementor-widget-image inside the container.
-		 */
 		_setupShrinkTargets() {
 			let targets = [];
 
 			const selectorRaw = (this.settings.mk_em_logo_selector || '').trim();
 			if (selectorRaw) {
-				// Ensure leading dot
 				const selector = selectorRaw.startsWith('.') ? selectorRaw : '.' + selectorRaw;
 				targets = Array.from(this.element.querySelectorAll(selector));
 			}
 
-			// Fallback: first image widget if no class specified
 			if (!targets.length) {
 				const fallback = this.element.querySelector('.elementor-widget-image');
 				if (fallback) targets = [fallback];
@@ -169,14 +165,11 @@
 			scrolledImg.setAttribute('aria-hidden', 'true');
 			scrolledImg.style.transition = 'opacity ' + this._transitionDur + 'ms ease, transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
 
-			// Apply object-fit and object-position inline (Elementor may skip CSS output
-			// for default-valued selectors; inline style is always reliable)
-			if (this.settings.mk_em_scrolled_logo_fit) {
-				scrolledImg.style.objectFit = this.settings.mk_em_scrolled_logo_fit;
-			}
-			if (this.settings.mk_em_scrolled_logo_position) {
-				scrolledImg.style.objectPosition = this.settings.mk_em_scrolled_logo_position;
-			}
+			// Always apply object-fit / object-position with fallback defaults.
+			// Elementor skips serialising frontend_available values that equal the
+			// control default, so we cannot rely on the setting being present.
+			scrolledImg.style.objectFit      = this.settings.mk_em_scrolled_logo_fit      || 'contain';
+			scrolledImg.style.objectPosition = this.settings.mk_em_scrolled_logo_position || 'left center';
 
 			originalParent.insertBefore(this.logoWrapper, defaultImg);
 			this.logoWrapper.appendChild(defaultImg);
@@ -343,7 +336,6 @@
 			});
 		});
 
-		// Start observing once the body is available
 		if (document.body) {
 			domObserver.observe(document.body, { childList: true, subtree: true });
 		} else {

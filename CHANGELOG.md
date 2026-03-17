@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.8] - 2026-03-17
+
+### Fixed
+- `object-fit` still not applied: Elementor also skips serialising `frontend_available` values that equal the control default — `mk_em_scrolled_logo_fit` and `mk_em_scrolled_logo_position` are now always applied with explicit fallbacks (`contain` / `left center`)
+- Editor detection was unreliable: `elementorFrontend` was undefined when our `DOMContentLoaded` handler ran because we had no script dependency; added `elementor-frontend` as a dependency to `wp_register_script` so our code always runs after Elementor's frontend is initialised
+
+### Added
+- **Preview Scrolled State** toggle in the editor (`mk_em_preview_scrolled`): when ON, the container shows the scrolled appearance (height, background, shadow, logo swap) as a static preview without affecting frontend behaviour; uses `render_type: template` so toggling it triggers a re-render that the MutationObserver picks up
+
 ## [0.1.7] - 2026-03-17
 
 ### Fixed

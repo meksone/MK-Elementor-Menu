@@ -310,6 +310,29 @@ class Sticky_Header {
 			]
 		);
 
+		// ── Editor Preview ────────────────────────────────────────
+		$element->add_control(
+			'mk_em_divider_preview',
+			[
+				'type'      => Controls_Manager::DIVIDER,
+				'condition' => [ 'mk_em_sticky_enable' => 'yes' ],
+			]
+		);
+
+		$element->add_control(
+			'mk_em_preview_scrolled',
+			[
+				'label'              => esc_html__( 'Preview Scrolled State', 'mk-elementor-menu' ),
+				'description'        => esc_html__( 'Toggle on to preview background, shadow, and logo swap as they appear after scrolling. Turn off before publishing.', 'mk-elementor-menu' ),
+				'type'               => Controls_Manager::SWITCHER,
+				'return_value'       => 'yes',
+				'default'            => '',
+				'condition'          => [ 'mk_em_sticky_enable' => 'yes' ],
+				'render_type'        => 'template',
+				'frontend_available' => true,
+			]
+		);
+
 		$element->end_controls_section();
 	}
 }

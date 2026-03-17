@@ -29,7 +29,7 @@ class Assets_Manager {
 		wp_register_script(
 			'mk-em-sticky-header',
 			MK_EM_URL . 'assets/js/sticky-header.js',
-			array(),
+			array( 'elementor-frontend' ),
 			MK_EM_VERSION,
 			true
 		);

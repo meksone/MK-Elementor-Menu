@@ -1,3 +1,10 @@
+<h4>0.1.8 — 2026-03-17</h4>
+<ul>
+    <li><strong>Fixed:</strong> <code>object-fit</code> still not applied — Elementor also skips serialising <code>frontend_available</code> values equal to the default; fit and position are now always written with explicit fallbacks.</li>
+    <li><strong>Fixed:</strong> Editor detection was unreliable — added <code>elementor-frontend</code> as a script dependency so our code runs after Elementor's frontend is ready.</li>
+    <li><strong>Added:</strong> <strong>Preview Scrolled State</strong> toggle — turn on in the editor to see background, shadow, logo swap and height exactly as they appear after scrolling.</li>
+</ul>
+
 <h4>0.1.7 — 2026-03-17</h4>
 <ul>
     <li><strong>Fixed:</strong> <strong>Scrolled Logo Fit</strong> had no effect — <code>object-fit</code> and <code>object-position</code> are now applied as inline styles by JS instead of relying on Elementor's CSS selector output (which skips default values).</li>
