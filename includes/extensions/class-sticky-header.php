@@ -328,7 +328,7 @@ class Sticky_Header {
 				'return_value'       => 'yes',
 				'default'            => '',
 				'condition'          => [ 'mk_em_sticky_enable' => 'yes' ],
-				'render_type'        => 'template',
+				'render_type'        => 'none',
 				'frontend_available' => true,
 			]
 		);

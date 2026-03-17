@@ -1,3 +1,10 @@
+<h4>0.1.9 — 2026-03-17</h4>
+<ul>
+    <li><strong>Fixed:</strong> <code>object-position</code> (and any <code>render_type:none</code> control) not updating live — a per-element <code>MutationObserver</code> on <code>data-settings</code> now re-inits the handler on every control change in the editor.</li>
+    <li><strong>Fixed:</strong> Editor detection uses three fallbacks: <code>elementor-editor-preview</code> body class, <code>elementorFrontend.isEditMode()</code>, and <code>window.parent.elementor</code> parent-frame check.</li>
+    <li><strong>Fixed:</strong> Preview switch no longer causes a flash — changed to <code>render_type:none</code>, handled entirely by the attribute observer.</li>
+</ul>
+
 <h4>0.1.8 — 2026-03-17</h4>
 <ul>
     <li><strong>Fixed:</strong> <code>object-fit</code> still not applied — Elementor also skips serialising <code>frontend_available</code> values equal to the default; fit and position are now always written with explicit fallbacks.</li>

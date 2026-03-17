@@ -1,9 +1,25 @@
 /**
  * Sticky Header Handler - vanilla JS, no jQuery
- * v0.1.8
+ * v0.1.9
  */
 (function() {
 	'use strict';
+
+	// ── Editor detection ──────────────────────────────────────────
+	// Called once; caches the result so every handler shares the same value.
+	function detectEditor() {
+		// 1. Elementor adds this class to the preview iframe's <body>
+		if (document.body.classList.contains('elementor-editor-preview')) return true;
+		// 2. elementorFrontend API (reliable once elementor-frontend.js is loaded)
+		if (window.elementorFrontend
+			&& typeof elementorFrontend.isEditMode === 'function'
+			&& elementorFrontend.isEditMode()) return true;
+		// 3. We are inside an iframe whose parent hosts the Elementor editor
+		if (window.parent !== window && window.parent.elementor) return true;
+		return false;
+	}
+
+	const IS_EDITOR = detectEditor();
 
 	class StickyHeaderHandler {
 		constructor(element, settings) {
@@ -16,8 +32,7 @@
 			this.shrinkTargets  = [];
 			this.initialHeight  = null;
 			this.stickyHeight   = null;
-			// Reliable editor detection: depends on elementor-frontend script (declared as dep)
-			this._isEditor      = !!(window.elementorFrontend && elementorFrontend.isEditMode && elementorFrontend.isEditMode());
+			this._attrObserver  = null;
 			this.init();
 		}
 
@@ -42,11 +57,10 @@
 				: 300;
 			this._transitionDur = dur;
 
-			if (this._isEditor) {
+			if (IS_EDITOR) {
 				// ── Editor mode ────────────────────────────────────
-				// Preview switch OFF: leave the container as-is (user sees normal layout).
-				// Preview switch ON:  show the scrolled state as a static snapshot so
-				//                     the user can inspect background, shadow, logo swap.
+				// Preview switch OFF: leave the container untouched (normal layout).
+				// Preview switch ON:  apply the scrolled state as a static snapshot.
 				if (this.settings.mk_em_preview_scrolled === 'yes') {
 					this.element.classList.add('mk-em-is-sticky', 'mk-em-is-scrolled');
 					this.element.style.height    = this.stickyHeight;
@@ -57,7 +71,11 @@
 						this._setupLogoSwap();
 					}
 				}
-				// No scroll listeners or fixed positioning in editor.
+
+				// Watch data-settings attribute for live control changes.
+				// Elementor updates data-settings on every render_type:'none' change
+				// without replacing the element, so MutationObserver(childList) misses it.
+				this._watchSettings();
 				return;
 			}
 
@@ -72,6 +90,26 @@
 			this._createSentinel();
 			this._bindScrollObserver();
 			this._bindResize();
+		}
+
+		// ── Settings watcher (editor only) ────────────────────────
+
+		_watchSettings() {
+			if (typeof MutationObserver === 'undefined') return;
+
+			this._attrObserver = new MutationObserver(() => {
+				// data-settings changed: destroy this handler and re-initialise
+				// so all controls (position, fit, preview switch, etc.) update live.
+				const el = this.element;
+				this.destroy();
+				el.__mkEmInit = false;
+				initContainer(el);
+			});
+
+			this._attrObserver.observe(this.element, {
+				attributes:      true,
+				attributeFilter: ['data-settings'],
+			});
 		}
 
 		// ── Positioning ───────────────────────────────────────────
@@ -165,9 +203,9 @@
 			scrolledImg.setAttribute('aria-hidden', 'true');
 			scrolledImg.style.transition = 'opacity ' + this._transitionDur + 'ms ease, transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
 
-			// Always apply object-fit / object-position with fallback defaults.
-			// Elementor skips serialising frontend_available values that equal the
-			// control default, so we cannot rely on the setting being present.
+			// Always set object-fit / object-position inline with explicit fallbacks.
+			// Elementor skips serialising frontend_available values equal to the control
+			// default, so the setting may be absent from data-settings entirely.
 			scrolledImg.style.objectFit      = this.settings.mk_em_scrolled_logo_fit      || 'contain';
 			scrolledImg.style.objectPosition = this.settings.mk_em_scrolled_logo_position || 'left center';
 
@@ -244,10 +282,11 @@
 		// ── Destroy ───────────────────────────────────────────────
 
 		destroy() {
-			if (this.observer) this.observer.disconnect();
+			if (this._attrObserver)   this._attrObserver.disconnect();
+			if (this.observer)        this.observer.disconnect();
 			if (this._resizeObserver) this._resizeObserver.disconnect();
-			if (this.sentinel) this.sentinel.remove();
-			if (this.spacer) this.spacer.remove();
+			if (this.sentinel)        this.sentinel.remove();
+			if (this.spacer)          this.spacer.remove();
 
 			this.shrinkTargets.forEach(el => {
 				el.classList.remove('mk-em-shrink-target');
@@ -320,7 +359,7 @@
 	}
 	window.addEventListener('load', initStickyHeaders);
 
-	// Watch for containers added/replaced by Elementor editor re-renders
+	// Watch for containers added by Elementor template re-renders
 	if (typeof MutationObserver !== 'undefined') {
 		const domObserver = new MutationObserver(function(mutations) {
 			mutations.forEach(function(mutation) {

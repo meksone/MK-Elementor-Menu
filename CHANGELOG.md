@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.9] - 2026-03-17
+
+### Fixed
+- `object-position` not applied in editor: `render_type: 'none'` controls update the `data-settings` attribute without replacing the element, so the old handler never re-ran with the new value; a per-element `MutationObserver` on `data-settings` now destroys and re-initialises the handler on every live control change
+- Editor detection was still unreliable: added three independent checks — `elementor-editor-preview` body class (primary), `elementorFrontend.isEditMode()` (secondary), `window.parent.elementor` iframe parent check (tertiary); evaluated once at module load into `IS_EDITOR` constant
+- Preview switch flash: changed `render_type` from `'template'` to `'none'`; now handled by the attribute observer above — no element replacement, no flash
+
 ## [0.1.8] - 2026-03-17
 
 ### Fixed
