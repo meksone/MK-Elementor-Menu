@@ -1,6 +1,6 @@
 /**
  * Sticky Header Handler - vanilla JS, no jQuery (except Elementor hook registration)
- * v0.1.10
+ * v0.1.14
  */
 (function($) {
 	'use strict';
@@ -350,6 +350,7 @@
 		if (container.__mkEmInit) return;
 
 		let settings = {};
+		console.log('MK Sticky Header: Initializing container', container);
 		try {
 			settings = JSON.parse(container.dataset.settings || '{}');
 		} catch (e) {
