@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.10] - 2026-03-17
+
+### Fixed
+- `object-position` not applied on frontend: replaced stale module-level `IS_EDITOR` constant (evaluated before `elementorFrontend` was ready) with the correct Elementor pattern — `$(window).on('elementor/frontend/init')` wrapping `elementorFrontend.hooks.addAction('frontend/element_ready/global')`, where `isEditMode()` is reliably available; `isEditor` is now passed through `initContainer` and stored on the handler instance
+- Editor preview switch with no effect or flash: same root cause as above — `isEditor` was always `false` at module load time so the editor branch never ran; now resolved by moving detection inside the `elementor/frontend/init` callback
+- `_watchSettings` MutationObserver reinit used stale `isEditor = false` from outer scope: now captures the correctly resolved `isEditor` value in its closure
+
 ## [0.1.9] - 2026-03-17
 
 ### Fixed

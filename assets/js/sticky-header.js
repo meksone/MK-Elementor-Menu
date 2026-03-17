@@ -1,30 +1,19 @@
 /**
- * Sticky Header Handler - vanilla JS, no jQuery
- * v0.1.9
+ * Sticky Header Handler - vanilla JS, no jQuery (except Elementor hook registration)
+ * v0.1.10
  */
-(function() {
+(function($) {
 	'use strict';
 
-	// ── Editor detection ──────────────────────────────────────────
-	// Called once; caches the result so every handler shares the same value.
-	function detectEditor() {
-		// 1. Elementor adds this class to the preview iframe's <body>
-		if (document.body.classList.contains('elementor-editor-preview')) return true;
-		// 2. elementorFrontend API (reliable once elementor-frontend.js is loaded)
-		if (window.elementorFrontend
-			&& typeof elementorFrontend.isEditMode === 'function'
-			&& elementorFrontend.isEditMode()) return true;
-		// 3. We are inside an iframe whose parent hosts the Elementor editor
-		if (window.parent !== window && window.parent.elementor) return true;
-		return false;
-	}
-
-	const IS_EDITOR = detectEditor();
+	// ─────────────────────────────────────────────────────────────
+	// Handler class
+	// ─────────────────────────────────────────────────────────────
 
 	class StickyHeaderHandler {
-		constructor(element, settings) {
+		constructor(element, settings, isEditor) {
 			this.element        = element;
 			this.settings       = settings;
+			this._isEditor      = isEditor;
 			this.observer       = null;
 			this.sentinel       = null;
 			this.logoWrapper    = null;
@@ -33,6 +22,7 @@
 			this.initialHeight  = null;
 			this.stickyHeight   = null;
 			this._attrObserver  = null;
+			this._resizeObserver = null;
 			this.init();
 		}
 
@@ -46,21 +36,17 @@
 		// ── Init ──────────────────────────────────────────────────
 
 		init() {
-			// Resolve heights
 			this.initialHeight = this._parseSlideSetting(this.settings.mk_em_initial_height)
 				|| (Math.max(this.element.offsetHeight, 80) + 'px');
 			this.stickyHeight  = this._parseSlideSetting(this.settings.mk_em_sticky_height) || '60px';
 
-			// Resolve transition duration
 			const dur = (this.settings.mk_em_transition_duration && this.settings.mk_em_transition_duration.size != null)
 				? this.settings.mk_em_transition_duration.size
 				: 300;
 			this._transitionDur = dur;
 
-			if (IS_EDITOR) {
-				// ── Editor mode ────────────────────────────────────
-				// Preview switch OFF: leave the container untouched (normal layout).
-				// Preview switch ON:  apply the scrolled state as a static snapshot.
+			if (this._isEditor) {
+				// ── Editor: show scrolled state if preview switch is ON ──
 				if (this.settings.mk_em_preview_scrolled === 'yes') {
 					this.element.classList.add('mk-em-is-sticky', 'mk-em-is-scrolled');
 					this.element.style.height    = this.stickyHeight;
@@ -71,15 +57,12 @@
 						this._setupLogoSwap();
 					}
 				}
-
-				// Watch data-settings attribute for live control changes.
-				// Elementor updates data-settings on every render_type:'none' change
-				// without replacing the element, so MutationObserver(childList) misses it.
+				// Watch data-settings for any render_type:'none' control changes
 				this._watchSettings();
 				return;
 			}
 
-			// ── Frontend mode ──────────────────────────────────────
+			// ── Frontend ──────────────────────────────────────────
 			this._applyFixedPosition();
 			this._createSpacer();
 			this.element.classList.add('mk-em-is-sticky');
@@ -93,19 +76,19 @@
 		}
 
 		// ── Settings watcher (editor only) ────────────────────────
+		// Elementor updates data-settings in-place for render_type:'none' controls
+		// without replacing the element, so frontend/element_ready won't re-fire.
+		// We watch the attribute directly and destroy+reinit on every change.
 
 		_watchSettings() {
 			if (typeof MutationObserver === 'undefined') return;
-
+			const isEditor = this._isEditor;
 			this._attrObserver = new MutationObserver(() => {
-				// data-settings changed: destroy this handler and re-initialise
-				// so all controls (position, fit, preview switch, etc.) update live.
 				const el = this.element;
 				this.destroy();
 				el.__mkEmInit = false;
-				initContainer(el);
+				initContainer(el, isEditor);
 			});
-
 			this._attrObserver.observe(this.element, {
 				attributes:      true,
 				attributeFilter: ['data-settings'],
@@ -146,7 +129,6 @@
 				this.element.style.left  = rect.left + 'px';
 				this.element.style.width = rect.width + 'px';
 			};
-
 			if (typeof ResizeObserver !== 'undefined') {
 				this._resizeObserver = new ResizeObserver(recalc);
 				this._resizeObserver.observe(document.body);
@@ -159,18 +141,15 @@
 
 		_setupShrinkTargets() {
 			let targets = [];
-
 			const selectorRaw = (this.settings.mk_em_logo_selector || '').trim();
 			if (selectorRaw) {
 				const selector = selectorRaw.startsWith('.') ? selectorRaw : '.' + selectorRaw;
 				targets = Array.from(this.element.querySelectorAll(selector));
 			}
-
 			if (!targets.length) {
 				const fallback = this.element.querySelector('.elementor-widget-image');
 				if (fallback) targets = [fallback];
 			}
-
 			targets.forEach(el => {
 				el.classList.add('mk-em-shrink-target');
 				el.style.transition      = 'transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
@@ -184,7 +163,6 @@
 		_setupLogoSwap() {
 			const imageWidget = this.element.querySelector('.elementor-widget-image');
 			if (!imageWidget) return;
-
 			const defaultImg = imageWidget.querySelector('img');
 			if (!defaultImg) return;
 
@@ -203,9 +181,8 @@
 			scrolledImg.setAttribute('aria-hidden', 'true');
 			scrolledImg.style.transition = 'opacity ' + this._transitionDur + 'ms ease, transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
 
-			// Always set object-fit / object-position inline with explicit fallbacks.
-			// Elementor skips serialising frontend_available values equal to the control
-			// default, so the setting may be absent from data-settings entirely.
+			// Always apply with explicit fallbacks — Elementor omits frontend_available
+			// values from data-settings when they equal the control default.
 			scrolledImg.style.objectFit      = this.settings.mk_em_scrolled_logo_fit      || 'contain';
 			scrolledImg.style.objectPosition = this.settings.mk_em_scrolled_logo_position || 'left center';
 
@@ -230,11 +207,8 @@
 				this.observer = new IntersectionObserver(
 					(entries) => {
 						entries.forEach((entry) => {
-							if (!entry.isIntersecting) {
-								this._onScrolled();
-							} else {
-								this._onRestored();
-							}
+							if (!entry.isIntersecting) this._onScrolled();
+							else                        this._onRestored();
 						});
 					},
 					{ threshold: 0 }
@@ -248,16 +222,12 @@
 		_bindScrollFallback() {
 			const threshold = parseInt(this.settings.mk_em_scroll_threshold) || 80;
 			let ticking = false;
-
 			window.addEventListener('scroll', () => {
 				if (!ticking) {
 					requestAnimationFrame(() => {
 						const scrollY = window.scrollY || window.pageYOffset;
-						if (scrollY > threshold) {
-							this._onScrolled();
-						} else {
-							this._onRestored();
-						}
+						if (scrollY > threshold) this._onScrolled();
+						else                      this._onRestored();
 						ticking = false;
 					});
 					ticking = true;
@@ -322,9 +292,11 @@
 		}
 	}
 
-	// ── Bootstrap ─────────────────────────────────────────────────
+	// ─────────────────────────────────────────────────────────────
+	// Bootstrap
+	// ─────────────────────────────────────────────────────────────
 
-	function initContainer(container) {
+	function initContainer(container, isEditor) {
 		if (container.__mkEmInit) return;
 
 		let settings = {};
@@ -337,7 +309,7 @@
 		if (settings.mk_em_sticky_enable !== 'yes') return;
 
 		container.__mkEmInit    = true;
-		container.__mkEmHandler = new StickyHeaderHandler(container, settings);
+		container.__mkEmHandler = new StickyHeaderHandler(container, settings, isEditor);
 
 		container.addEventListener('elementor/destroyed', function() {
 			if (container.__mkEmHandler) {
@@ -347,41 +319,20 @@
 		});
 	}
 
-	function initStickyHeaders() {
-		document.querySelectorAll('.e-con[data-settings]').forEach(initContainer);
-	}
+	// Use the documented Elementor pattern:
+	//   $(window).on('elementor/frontend/init', ...)
+	// This fires after elementorFrontend is fully initialised — isEditMode() is
+	// reliable here.  Then register frontend/element_ready/global which fires for
+	// every element on both the frontend AND in the editor preview on each render.
 
-	// Initial scan
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', initStickyHeaders);
-	} else {
-		initStickyHeaders();
-	}
-	window.addEventListener('load', initStickyHeaders);
+	$(window).on('elementor/frontend/init', function() {
+		var isEditor = elementorFrontend.isEditMode();
 
-	// Watch for containers added by Elementor template re-renders
-	if (typeof MutationObserver !== 'undefined') {
-		const domObserver = new MutationObserver(function(mutations) {
-			mutations.forEach(function(mutation) {
-				mutation.addedNodes.forEach(function(node) {
-					if (node.nodeType !== 1) return;
-					if (node.matches && node.matches('.e-con[data-settings]')) {
-						initContainer(node);
-					}
-					if (node.querySelectorAll) {
-						node.querySelectorAll('.e-con[data-settings]').forEach(initContainer);
-					}
-				});
-			});
+		elementorFrontend.hooks.addAction('frontend/element_ready/global', function($scope) {
+			var el = $scope[0];
+			if (!el.classList.contains('e-con')) return;
+			initContainer(el, isEditor);
 		});
+	});
 
-		if (document.body) {
-			domObserver.observe(document.body, { childList: true, subtree: true });
-		} else {
-			document.addEventListener('DOMContentLoaded', function() {
-				domObserver.observe(document.body, { childList: true, subtree: true });
-			});
-		}
-	}
-
-})();
+})(jQuery);
