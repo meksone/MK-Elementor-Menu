@@ -1,6 +1,6 @@
 /**
  * Sticky Header Handler - vanilla JS, no jQuery
- * v0.1.4
+ * v0.1.5
  */
 (function() {
 	'use strict';
@@ -37,6 +37,12 @@
 			this.initialHeight = this._parseSlideSetting(this.settings.mk_em_initial_height)
 				|| (this.element.offsetHeight + 'px');
 			this.stickyHeight  = this._parseSlideSetting(this.settings.mk_em_sticky_height) || '60px';
+
+			// Resolve transition duration
+			const dur = (this.settings.mk_em_transition_duration && this.settings.mk_em_transition_duration.size != null)
+				? this.settings.mk_em_transition_duration.size
+				: 300;
+			this._transitionDur = dur;
 
 			// Apply fixed positioning (mirrors Elementor PRO sticky for header location compatibility)
 			this._applyFixedPosition();
@@ -75,6 +81,7 @@
 			this.element.style.width        = rect.width + 'px';
 			this.element.style.height       = this.initialHeight;
 			this.element.style.minHeight    = '0';
+			this.element.style.transition   = 'height ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1), background-color ' + this._transitionDur + 'ms ease, box-shadow ' + this._transitionDur + 'ms ease';
 			this.element.style.zIndex       = zIndex;
 			this.element.style.marginTop    = '0';
 			this.element.style.marginBottom = '0';
@@ -128,7 +135,11 @@
 				if (fallback) targets = [fallback];
 			}
 
-			targets.forEach(el => el.classList.add('mk-em-shrink-target'));
+			targets.forEach(el => {
+				el.classList.add('mk-em-shrink-target');
+				el.style.transition = 'transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
+				el.style.transformOrigin = 'left center';
+			});
 			this.shrinkTargets = targets;
 		}
 
@@ -147,12 +158,14 @@
 			this.logoWrapper.className = 'mk-em-logo-wrapper mk-em-logo-anim-' + (this.settings.mk_em_logo_animation || 'fade');
 
 			defaultImg.classList.add('mk-em-logo-default');
+			defaultImg.style.transition = 'opacity ' + this._transitionDur + 'ms ease, transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
 
 			const scrolledImg    = document.createElement('img');
 			scrolledImg.src      = this.settings.mk_em_scrolled_logo.url;
 			scrolledImg.alt      = defaultImg.alt;
 			scrolledImg.className = 'mk-em-logo-scrolled';
 			scrolledImg.setAttribute('aria-hidden', 'true');
+			scrolledImg.style.transition = 'opacity ' + this._transitionDur + 'ms ease, transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
 
 			originalParent.insertBefore(this.logoWrapper, defaultImg);
 			this.logoWrapper.appendChild(defaultImg);
@@ -243,7 +256,11 @@
 			if (this.sentinel) this.sentinel.remove();
 			if (this.spacer) this.spacer.remove();
 
-			this.shrinkTargets.forEach(el => el.classList.remove('mk-em-shrink-target'));
+			this.shrinkTargets.forEach(el => {
+				el.classList.remove('mk-em-shrink-target');
+				el.style.transition    = '';
+				el.style.transformOrigin = '';
+			});
 
 			if (this.logoWrapper) {
 				const defaultImg  = this.logoWrapper.querySelector('.mk-em-logo-default');
@@ -267,6 +284,7 @@
 			this.element.style.overflow     = '';
 			this.element.style.marginTop    = '';
 			this.element.style.marginBottom = '';
+			this.element.style.transition   = '';
 			this.element.classList.remove('mk-em-is-sticky', 'mk-em-is-scrolled', 'mk-em-has-shadow');
 		}
 	}

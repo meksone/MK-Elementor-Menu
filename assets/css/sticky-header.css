@@ -1,19 +1,14 @@
 /**
  * Sticky Header CSS
- * position:fixed + height are applied via inline style by JS.
- * CSS handles transitions and state-based visual changes only.
+ * position:fixed, height, and all transitions are applied via inline style by JS.
+ * CSS handles state-based visual changes (opacity/transform states) only.
  */
 
 /* ── Base sticky state ──────────────────────────────────────── */
+/* transition is set inline by JS (reads duration from settings) */
 .mk-em-is-sticky {
 	box-sizing: border-box;
 	z-index: var(--mk-em-z-index, 999);
-	/* height is set inline by JS — declare transition here so it
-	   applies in BOTH directions (scroll down AND scroll up) */
-	transition:
-		height              var(--mk-em-transition-duration, 300ms) cubic-bezier(0.4, 0, 0.2, 1),
-		background-color    var(--mk-em-transition-duration, 300ms) ease,
-		box-shadow          var(--mk-em-transition-duration, 300ms) ease;
 }
 
 /* ── Scrolled state ─────────────────────────────────────────── */
@@ -26,11 +21,9 @@
 }
 
 /* ── Logo shrink target ─────────────────────────────────────── */
-/* Transition declared on BASE state so the reverse (scroll up)
-   also animates — not just the forward direction */
+/* transition + transform-origin are set inline by JS */
 .mk-em-is-sticky .mk-em-shrink-target {
-	transition: transform var(--mk-em-transition-duration, 300ms) cubic-bezier(0.4, 0, 0.2, 1);
-	transform-origin: left center;
+	/* placeholder — actual transition set inline */
 }
 
 .mk-em-is-sticky.mk-em-is-scrolled .mk-em-shrink-target {
@@ -43,12 +36,10 @@
 	display: inline-block;
 }
 
+/* transition set inline by JS */
 .mk-em-logo-default,
 .mk-em-logo-scrolled {
 	display: block;
-	transition:
-		opacity   var(--mk-em-transition-duration, 300ms) ease,
-		transform var(--mk-em-transition-duration, 300ms) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mk-em-logo-scrolled {

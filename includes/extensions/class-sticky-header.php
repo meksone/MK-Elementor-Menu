@@ -76,12 +76,14 @@ class Sticky_Header {
 		$element->add_control(
 			'mk_em_transition_duration',
 			[
-				'label'     => esc_html__( 'Transition Duration (ms)', 'mk-elementor-menu' ),
-				'type'      => Controls_Manager::SLIDER,
-				'default'   => [ 'size' => 300 ],
-				'range'     => [ 'px' => [ 'min' => 0, 'max' => 1000, 'step' => 50 ] ],
-				'condition' => [ 'mk_em_sticky_enable' => 'yes' ],
-				'selectors' => [ '{{WRAPPER}}' => '--mk-em-transition-duration: {{SIZE}}ms;' ],
+				'label'              => esc_html__( 'Transition Duration (ms)', 'mk-elementor-menu' ),
+				'type'               => Controls_Manager::SLIDER,
+				'default'            => [ 'size' => 300 ],
+				'range'              => [ 'px' => [ 'min' => 0, 'max' => 1000, 'step' => 50 ] ],
+				'condition'          => [ 'mk_em_sticky_enable' => 'yes' ],
+				'render_type'        => 'none',
+				'frontend_available' => true,
+				'selectors'          => [ '{{WRAPPER}}' => '--mk-em-transition-duration: {{SIZE}}ms;' ],
 			]
 		);
 
