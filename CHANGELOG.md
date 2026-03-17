@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.13] - 2026-03-17
+
+### Fixed
+- `object-fit` / `object-position` still not applying: added `frontend_available: true` back to both controls so non-default values are serialised into `data-settings`; JS now reads them and applies as inline styles (which always win over CSS), but only when the value is explicitly present — the CSS `var(--mk-em-logo-fit, contain)` / `var(--mk-em-logo-position, left center)` fallback in `sticky-header.css` covers the default case without JS needing to know the default value
+
 ## [0.1.12] - 2026-03-17
 
 ### Fixed

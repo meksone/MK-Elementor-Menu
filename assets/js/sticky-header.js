@@ -181,6 +181,16 @@
 			scrolledImg.setAttribute('aria-hidden', 'true');
 			scrolledImg.style.transition = 'opacity ' + this._transitionDur + 'ms ease, transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
 
+			// Apply only when the value is explicitly present in data-settings
+			// (Elementor omits default values from data-settings, so the CSS var()
+			// fallback in sticky-header.css handles those cases).
+			if (this.settings.mk_em_scrolled_logo_fit) {
+				scrolledImg.style.objectFit = this.settings.mk_em_scrolled_logo_fit;
+			}
+			if (this.settings.mk_em_scrolled_logo_position) {
+				scrolledImg.style.objectPosition = this.settings.mk_em_scrolled_logo_position;
+			}
+
 			originalParent.insertBefore(this.logoWrapper, defaultImg);
 			this.logoWrapper.appendChild(defaultImg);
 			this.logoWrapper.appendChild(scrolledImg);

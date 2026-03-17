@@ -217,17 +217,18 @@ class Sticky_Header {
 					'mk_em_sticky_enable'  => 'yes',
 					'mk_em_scrolled_logo!' => '',
 				],
-				'render_type' => 'none',
-				'selectors'  => [ '{{WRAPPER}}' => '--mk-em-logo-fit: {{VALUE}};' ],
+				'render_type'        => 'none',
+				'frontend_available' => true,
+				'selectors'          => [ '{{WRAPPER}}' => '--mk-em-logo-fit: {{VALUE}};' ],
 			]
 		);
 
 		$element->add_control(
 			'mk_em_scrolled_logo_position',
 			[
-				'label'      => esc_html__( 'Scrolled Logo Position', 'mk-elementor-menu' ),
-				'type'       => Controls_Manager::SELECT,
-				'options'    => [
+				'label'              => esc_html__( 'Scrolled Logo Position', 'mk-elementor-menu' ),
+				'type'               => Controls_Manager::SELECT,
+				'options'            => [
 					'left top'      => esc_html__( 'Left Top', 'mk-elementor-menu' ),
 					'left center'   => esc_html__( 'Left Center', 'mk-elementor-menu' ),
 					'left bottom'   => esc_html__( 'Left Bottom', 'mk-elementor-menu' ),
@@ -238,13 +239,14 @@ class Sticky_Header {
 					'right center'  => esc_html__( 'Right Center', 'mk-elementor-menu' ),
 					'right bottom'  => esc_html__( 'Right Bottom', 'mk-elementor-menu' ),
 				],
-				'default'    => 'left center',
-				'condition'  => [
+				'default'            => 'left center',
+				'condition'          => [
 					'mk_em_sticky_enable'  => 'yes',
 					'mk_em_scrolled_logo!' => '',
 				],
-				'render_type' => 'none',
-				'selectors'  => [ '{{WRAPPER}}' => '--mk-em-logo-position: {{VALUE}};' ],
+				'render_type'        => 'none',
+				'frontend_available' => true,
+				'selectors'          => [ '{{WRAPPER}}' => '--mk-em-logo-position: {{VALUE}};' ],
 			]
 		);
 

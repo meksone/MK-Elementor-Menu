@@ -1,3 +1,8 @@
+<h4>0.1.13 — 2026-03-17</h4>
+<ul>
+    <li><strong>Fixed:</strong> <code>object-fit</code> / <code>object-position</code> still not applying — added <code>frontend_available: true</code> back to both controls so non-default values are serialised into <code>data-settings</code>; JS applies them as inline styles (highest precedence) only when explicitly present; CSS <code>var()</code> fallbacks cover default values.</li>
+</ul>
+
 <h4>0.1.12 — 2026-03-17</h4>
 <ul>
     <li><strong>Fixed:</strong> <code>object-fit</code> / <code>object-position</code> still not applying — Elementor does not reliably generate CSS for selectors targeting dynamically created child classes; switched to the established CSS custom-property pattern: controls now write <code>--mk-em-logo-fit</code> and <code>--mk-em-logo-position</code> onto <code>{{WRAPPER}}</code>, which Elementor definitely processes; <code>.mk-em-logo-scrolled</code> reads them via <code>var()</code> with correct defaults as fallback.</li>
