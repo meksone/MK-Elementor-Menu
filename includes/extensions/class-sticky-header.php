@@ -196,7 +196,7 @@ class Sticky_Header {
 					'mk_em_sticky_enable'  => 'yes',
 					'mk_em_scrolled_logo!' => '',
 				],
-				'selectors'  => [ '{{WRAPPER}}' => '--mk-em-scrolled-logo-width: {{SIZE}}{{UNIT}};' ],
+				'selectors'  => [ '{{WRAPPER}} .mk-em-logo-scrolled' => 'width: {{SIZE}}{{UNIT}};' ],
 			]
 		);
 
@@ -217,9 +217,8 @@ class Sticky_Header {
 					'mk_em_sticky_enable'  => 'yes',
 					'mk_em_scrolled_logo!' => '',
 				],
-				'render_type'        => 'none',
 				'frontend_available' => true,
-				'selectors'          => [ '{{WRAPPER}}' => '--mk-em-logo-fit: {{VALUE}};' ],
+				'selectors'          => [ '{{WRAPPER}} .mk-em-logo-scrolled' => 'object-fit: {{VALUE}};' ],
 			]
 		);
 
@@ -244,9 +243,8 @@ class Sticky_Header {
 					'mk_em_sticky_enable'  => 'yes',
 					'mk_em_scrolled_logo!' => '',
 				],
-				'render_type'        => 'none',
 				'frontend_available' => true,
-				'selectors'          => [ '{{WRAPPER}}' => '--mk-em-logo-position: {{VALUE}};' ],
+				'selectors'          => [ '{{WRAPPER}} .mk-em-logo-scrolled' => 'object-position: {{VALUE}};' ],
 			]
 		);
 

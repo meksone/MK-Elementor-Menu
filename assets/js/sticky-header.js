@@ -1,6 +1,6 @@
 /**
  * Sticky Header Handler - vanilla JS, no jQuery (except Elementor hook registration)
- * v0.1.14
+ * v0.1.15
  */
 (function($) {
 	'use strict';
@@ -225,16 +225,13 @@
 			scrolledImg.setAttribute('aria-hidden', 'true');
 			scrolledImg.style.transition = 'opacity ' + this._transitionDur + 'ms ease, transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
 
-			// Apply only when the value is explicitly present in data-settings.
-			// Elementor omits default values from data-settings, so check both properties.
-			const fit = this.settings.mk_em_scrolled_logo_fit;
-			if (fit && fit !== '') {
-				scrolledImg.style.objectFit = fit;
-			}
-			const pos = this.settings.mk_em_scrolled_logo_position;
-			if (pos && pos !== '') {
-				scrolledImg.style.objectPosition = pos;
-			}
+			// Re-implement inline style application for object-fit and position.
+			// This ensures they are applied even if Elementor's CSS output is delayed
+			// or if we need to force the values on the dynamically created element.
+			const fit = this.settings.mk_em_scrolled_logo_fit || 'contain';
+			const pos = this.settings.mk_em_scrolled_logo_position || 'left center';
+			scrolledImg.style.objectFit = fit;
+			scrolledImg.style.objectPosition = pos;
 
 			originalParent.insertBefore(this.logoWrapper, defaultImg);
 			this.logoWrapper.appendChild(defaultImg);
@@ -349,12 +346,17 @@
 	function initContainer(container, isEditor) {
 		if (container.__mkEmInit) return;
 
+		// Use the documented Elementor utility to get settings.
+		// This correctly handles defaults that might be missing from data-settings.
 		let settings = {};
-		console.log('MK Sticky Header: Initializing container', container);
-		try {
-			settings = JSON.parse(container.dataset.settings || '{}');
-		} catch (e) {
-			return;
+		if (isEditor && window.elementorFrontend && elementorFrontend.utils && elementorFrontend.utils.controls) {
+			settings = elementorFrontend.utils.controls.getElementSettings(container);
+		} else {
+			try {
+				settings = JSON.parse(container.dataset.settings || '{}');
+			} catch (e) {
+				return;
+			}
 		}
 
 		if (settings.mk_em_sticky_enable !== 'yes') return;
