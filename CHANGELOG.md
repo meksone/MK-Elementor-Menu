@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] - 2026-03-17
+
+### Fixed
+- Container with background image (no content) was invisible: `offsetHeight` fallback now uses `Math.max(offsetHeight, 80)` so a height-less background-only container gets at least 80px
+
+### Changed
+- **Background (scrolled)**: replaced single color control with Elementor `Background` group control — now supports solid color, gradient, and image
+- **Box Shadow (scrolled)**: replaced ON/OFF switcher with Elementor `Box Shadow` group control — fully editable (color, blur, spread, offset, inset)
+- Removed `mk-em-has-shadow` CSS class; shadow is now applied directly via Elementor selector `{{WRAPPER}}.mk-em-is-scrolled`
+
+### Added
+- **Scrolled Logo Position** select (9 options: left/center/right × top/center/bottom) — controls `object-position` of the alternate logo image
+
 ## [0.1.5] - 2026-03-17
 
 ### Fixed

@@ -1,6 +1,6 @@
 /**
  * Sticky Header Handler - vanilla JS, no jQuery
- * v0.1.5
+ * v0.1.6
  */
 (function() {
 	'use strict';
@@ -35,7 +35,7 @@
 		init() {
 			// Resolve heights
 			this.initialHeight = this._parseSlideSetting(this.settings.mk_em_initial_height)
-				|| (this.element.offsetHeight + 'px');
+				|| (Math.max(this.element.offsetHeight, 80) + 'px');
 			this.stickyHeight  = this._parseSlideSetting(this.settings.mk_em_sticky_height) || '60px';
 
 			// Resolve transition duration
@@ -232,10 +232,6 @@
 			this.element.style.height = this.stickyHeight;
 
 			this.element.classList.add('mk-em-is-scrolled');
-
-			if (this.settings.mk_em_scrolled_box_shadow === 'yes') {
-				this.element.classList.add('mk-em-has-shadow');
-			}
 		}
 
 		_onRestored() {
@@ -245,7 +241,6 @@
 			this.element.style.height = this.initialHeight;
 
 			this.element.classList.remove('mk-em-is-scrolled');
-			this.element.classList.remove('mk-em-has-shadow');
 		}
 
 		// ── Destroy ───────────────────────────────────────────────
@@ -285,7 +280,7 @@
 			this.element.style.marginTop    = '';
 			this.element.style.marginBottom = '';
 			this.element.style.transition   = '';
-			this.element.classList.remove('mk-em-is-sticky', 'mk-em-is-scrolled', 'mk-em-has-shadow');
+			this.element.classList.remove('mk-em-is-sticky', 'mk-em-is-scrolled');
 		}
 	}
 

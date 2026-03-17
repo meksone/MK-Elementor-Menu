@@ -12,13 +12,8 @@
 }
 
 /* ── Scrolled state ─────────────────────────────────────────── */
-.elementor-element.mk-em-is-sticky.mk-em-is-scrolled {
-	background-color: var(--mk-em-scrolled-bg, transparent);
-}
-
-.mk-em-is-sticky.mk-em-is-scrolled.mk-em-has-shadow {
-	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
-}
+/* background and box-shadow are output by Elementor group controls
+   targeting {{WRAPPER}}.mk-em-is-scrolled — no CSS needed here */
 
 /* ── Logo shrink target ─────────────────────────────────────── */
 /* transition + transform-origin are set inline by JS */
@@ -48,8 +43,7 @@
 	left: 0;
 	width: var(--mk-em-scrolled-logo-width, 100%);
 	height: 100%;
-	object-fit: var(--mk-em-scrolled-logo-fit, contain);
-	object-position: left center;
+	/* object-fit and object-position output by Elementor selectors */
 }
 
 /* Fade */

@@ -7,6 +7,8 @@ namespace MK_Elementor_Menu\Extensions;
 
 use Elementor\Controls_Manager;
 use Elementor\Element_Base;
+use Elementor\Group_Control_Background;
+use Elementor\Group_Control_Box_Shadow;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -215,7 +217,32 @@ class Sticky_Header {
 					'mk_em_sticky_enable'  => 'yes',
 					'mk_em_scrolled_logo!' => '',
 				],
-				'selectors' => [ '{{WRAPPER}}' => '--mk-em-scrolled-logo-fit: {{VALUE}};' ],
+				'selectors' => [ '{{WRAPPER}} .mk-em-logo-scrolled' => 'object-fit: {{VALUE}};' ],
+			]
+		);
+
+		$element->add_control(
+			'mk_em_scrolled_logo_position',
+			[
+				'label'     => esc_html__( 'Scrolled Logo Position', 'mk-elementor-menu' ),
+				'type'      => Controls_Manager::SELECT,
+				'options'   => [
+					'left top'      => esc_html__( 'Left Top', 'mk-elementor-menu' ),
+					'left center'   => esc_html__( 'Left Center', 'mk-elementor-menu' ),
+					'left bottom'   => esc_html__( 'Left Bottom', 'mk-elementor-menu' ),
+					'center top'    => esc_html__( 'Center Top', 'mk-elementor-menu' ),
+					'center center' => esc_html__( 'Center Center', 'mk-elementor-menu' ),
+					'center bottom' => esc_html__( 'Center Bottom', 'mk-elementor-menu' ),
+					'right top'     => esc_html__( 'Right Top', 'mk-elementor-menu' ),
+					'right center'  => esc_html__( 'Right Center', 'mk-elementor-menu' ),
+					'right bottom'  => esc_html__( 'Right Bottom', 'mk-elementor-menu' ),
+				],
+				'default'   => 'left center',
+				'condition' => [
+					'mk_em_sticky_enable'  => 'yes',
+					'mk_em_scrolled_logo!' => '',
+				],
+				'selectors' => [ '{{WRAPPER}} .mk-em-logo-scrolled' => 'object-position: {{VALUE}};' ],
 			]
 		);
 
@@ -248,27 +275,24 @@ class Sticky_Header {
 			]
 		);
 
-		$element->add_control(
-			'mk_em_scrolled_bg_color',
+		$element->add_group_control(
+			Group_Control_Background::get_type(),
 			[
-				'label'     => esc_html__( 'Background Color (scrolled)', 'mk-elementor-menu' ),
-				'type'      => Controls_Manager::COLOR,
-				'default'   => '#ffffff',
+				'name'      => 'mk_em_scrolled_bg',
+				'label'     => esc_html__( 'Background (scrolled)', 'mk-elementor-menu' ),
+				'types'     => [ 'classic', 'gradient' ],
+				'selector'  => '{{WRAPPER}}.mk-em-is-scrolled',
 				'condition' => [ 'mk_em_sticky_enable' => 'yes' ],
-				'selectors' => [ '{{WRAPPER}}' => '--mk-em-scrolled-bg: {{VALUE}};' ],
 			]
 		);
 
-		$element->add_control(
-			'mk_em_scrolled_box_shadow',
+		$element->add_group_control(
+			Group_Control_Box_Shadow::get_type(),
 			[
-				'label'              => esc_html__( 'Box Shadow (scrolled)', 'mk-elementor-menu' ),
-				'type'               => Controls_Manager::SWITCHER,
-				'return_value'       => 'yes',
-				'default'            => '',
-				'condition'          => [ 'mk_em_sticky_enable' => 'yes' ],
-				'render_type'        => 'none',
-				'frontend_available' => true,
+				'name'      => 'mk_em_scrolled_shadow',
+				'label'     => esc_html__( 'Box Shadow (scrolled)', 'mk-elementor-menu' ),
+				'selector'  => '{{WRAPPER}}.mk-em-is-scrolled',
+				'condition' => [ 'mk_em_sticky_enable' => 'yes' ],
 			]
 		);
 
