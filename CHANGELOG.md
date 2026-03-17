@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.15] - 2026-03-18
+
+### Fixed
+- Frontend Image Settings: Re-implemented inline application of `object-fit` and `object-position` in JS to ensure they are applied to dynamically created logo elements.
+- Editor Reliability: Switched to `elementorFrontend.utils.controls.getElementSettings` in the editor for more robust settings retrieval, including default values.
+- CSS Selectors: Updated PHP extension to target `.mk-em-logo-scrolled` directly in CSS selectors for improved specificity.
+
+## [0.1.14] - 2026-03-18
+
+### Fixed
+- Backend Preview Reliability: Improved synchronization in the Elementor Editor using `requestAnimationFrame` to wait for DOM updates before re-initializing the handler.
+- Logo Detection: Expanded support for common Elementor widgets like 'Site Logo' and improved the custom CSS selector logic to support IDs and better targeting.
+- Frontend Image Settings: Fixed an issue where default values for `object-fit` and `object-position` were being overridden by empty strings in JavaScript.
+
 ## [0.1.13] - 2026-03-17
 
 ### Fixed

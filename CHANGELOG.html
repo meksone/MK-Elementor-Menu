@@ -1,3 +1,17 @@
+<h4>0.1.15 — 2026-03-18</h4>
+<ul>
+    <li><strong>Fixed:</strong> Frontend Image Settings — Re-implemented inline application of <code>object-fit</code> and <code>object-position</code> in JS to ensure they are applied to dynamically created logo elements.</li>
+    <li><strong>Fixed:</strong> Editor Reliability — Switched to <code>elementorFrontend.utils.controls.getElementSettings</code> in the editor for more robust settings retrieval, including default values.</li>
+    <li><strong>Fixed:</strong> CSS Selectors — Updated PHP extension to target <code>.mk-em-logo-scrolled</code> directly in CSS selectors for improved specificity.</li>
+</ul>
+
+<h4>0.1.14 — 2026-03-18</h4>
+<ul>
+    <li><strong>Fixed:</strong> Backend Preview Reliability — Improved synchronization in the Elementor Editor using <code>requestAnimationFrame</code> to wait for DOM updates before re-initializing the handler.</li>
+    <li><strong>Fixed:</strong> Logo Detection — Expanded support for common Elementor widgets like 'Site Logo' and improved the custom CSS selector logic to support IDs and better targeting.</li>
+    <li><strong>Fixed:</strong> Frontend Image Settings — Fixed an issue where default values for <code>object-fit</code> and <code>object-position</code> were being overridden by empty strings in JavaScript.</li>
+</ul>
+
 <h4>0.1.13 — 2026-03-17</h4>
 <ul>
     <li><strong>Fixed:</strong> <code>object-fit</code> / <code>object-position</code> still not applying — added <code>frontend_available: true</code> back to both controls so non-default values are serialised into <code>data-settings</code>; JS applies them as inline styles (highest precedence) only when explicitly present; CSS <code>var()</code> fallbacks cover default values.</li>
