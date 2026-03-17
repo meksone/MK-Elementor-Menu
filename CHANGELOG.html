@@ -1,3 +1,9 @@
+<h4>0.1.7 — 2026-03-17</h4>
+<ul>
+    <li><strong>Fixed:</strong> <strong>Scrolled Logo Fit</strong> had no effect — <code>object-fit</code> and <code>object-position</code> are now applied as inline styles by JS instead of relying on Elementor's CSS selector output (which skips default values).</li>
+    <li><strong>Fixed:</strong> Editor preview showed a normal container regardless of settings — JS now detects edit mode and renders the sticky scrolled state as a static preview; a <code>MutationObserver</code> re-initialises on every settings change re-render.</li>
+</ul>
+
 <h4>0.1.6 — 2026-03-17</h4>
 <ul>
     <li><strong>Fixed:</strong> Container with background image only (no content widgets) was invisible — height fallback now uses at least 80px.</li>

@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.7] - 2026-03-17
+
+### Fixed
+- `object-fit` not applied to scrolled logo: Elementor skips CSS output for default-valued selector controls; `object-fit` and `object-position` are now applied as inline styles by JS (controls marked `frontend_available`)
+- Editor preview did nothing: JS now detects `elementorFrontend.isEditMode()` and shows the sticky scrolled state as a static preview (no `position:fixed`) so background, shadow, logo and height are all visible while editing; `MutationObserver` re-initialises containers when Elementor re-renders them after a settings change
+
 ## [0.1.6] - 2026-03-17
 
 ### Fixed

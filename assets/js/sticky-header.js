@@ -1,6 +1,6 @@
 /**
  * Sticky Header Handler - vanilla JS, no jQuery
- * v0.1.6
+ * v0.1.7
  */
 (function() {
 	'use strict';
@@ -16,6 +16,7 @@
 			this.shrinkTargets  = [];
 			this.initialHeight  = null;
 			this.stickyHeight   = null;
+			this._isEditor      = !!(window.elementorFrontend && elementorFrontend.isEditMode && elementorFrontend.isEditMode());
 			this.init();
 		}
 
@@ -44,29 +45,30 @@
 				: 300;
 			this._transitionDur = dur;
 
-			// Apply fixed positioning (mirrors Elementor PRO sticky for header location compatibility)
-			this._applyFixedPosition();
+			if (this._isEditor) {
+				// Editor: show the scrolled state as a static preview so the user can
+				// see background, shadow, logo swap and height in action.
+				// Do NOT apply position:fixed — that breaks the editing experience.
+				this.element.classList.add('mk-em-is-sticky', 'mk-em-is-scrolled');
+				this.element.style.height    = this.stickyHeight;
+				this.element.style.minHeight = '0';
+				this.element.style.overflow  = 'hidden';
+			} else {
+				// Frontend: full sticky behaviour
+				this._applyFixedPosition();
+				this._createSpacer();
+				this.element.classList.add('mk-em-is-sticky');
+				this._createSentinel();
+				this._bindScrollObserver();
+				this._bindResize();
+			}
 
-			// Spacer fills the layout gap left by fixed positioning
-			this._createSpacer();
-
-			// Mark element
-			this.element.classList.add('mk-em-is-sticky');
-
-			// Find and mark the logo shrink target(s)
+			// Shrink target(s) and logo swap apply in both modes
 			this._setupShrinkTargets();
 
-			// Logo swap (alternate image on scroll)
 			if (this.settings.mk_em_scrolled_logo && this.settings.mk_em_scrolled_logo.url) {
 				this._setupLogoSwap();
 			}
-
-			// Scroll detection
-			this._createSentinel();
-			this._bindScrollObserver();
-
-			// Recalculate width on resize
-			this._bindResize();
 		}
 
 		// ── Positioning ───────────────────────────────────────────
@@ -137,7 +139,7 @@
 
 			targets.forEach(el => {
 				el.classList.add('mk-em-shrink-target');
-				el.style.transition = 'transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
+				el.style.transition      = 'transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
 				el.style.transformOrigin = 'left center';
 			});
 			this.shrinkTargets = targets;
@@ -160,12 +162,21 @@
 			defaultImg.classList.add('mk-em-logo-default');
 			defaultImg.style.transition = 'opacity ' + this._transitionDur + 'ms ease, transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
 
-			const scrolledImg    = document.createElement('img');
-			scrolledImg.src      = this.settings.mk_em_scrolled_logo.url;
-			scrolledImg.alt      = defaultImg.alt;
+			const scrolledImg     = document.createElement('img');
+			scrolledImg.src       = this.settings.mk_em_scrolled_logo.url;
+			scrolledImg.alt       = defaultImg.alt;
 			scrolledImg.className = 'mk-em-logo-scrolled';
 			scrolledImg.setAttribute('aria-hidden', 'true');
 			scrolledImg.style.transition = 'opacity ' + this._transitionDur + 'ms ease, transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
+
+			// Apply object-fit and object-position inline (Elementor may skip CSS output
+			// for default-valued selectors; inline style is always reliable)
+			if (this.settings.mk_em_scrolled_logo_fit) {
+				scrolledImg.style.objectFit = this.settings.mk_em_scrolled_logo_fit;
+			}
+			if (this.settings.mk_em_scrolled_logo_position) {
+				scrolledImg.style.objectPosition = this.settings.mk_em_scrolled_logo_position;
+			}
 
 			originalParent.insertBefore(this.logoWrapper, defaultImg);
 			this.logoWrapper.appendChild(defaultImg);
@@ -227,19 +238,13 @@
 
 		_onScrolled() {
 			if (this.element.classList.contains('mk-em-is-scrolled')) return;
-
-			// Shrink height (transition is declared in CSS on .mk-em-is-sticky)
 			this.element.style.height = this.stickyHeight;
-
 			this.element.classList.add('mk-em-is-scrolled');
 		}
 
 		_onRestored() {
 			if (!this.element.classList.contains('mk-em-is-scrolled')) return;
-
-			// Restore height (transition runs in reverse)
 			this.element.style.height = this.initialHeight;
-
 			this.element.classList.remove('mk-em-is-scrolled');
 		}
 
@@ -253,7 +258,7 @@
 
 			this.shrinkTargets.forEach(el => {
 				el.classList.remove('mk-em-shrink-target');
-				el.style.transition    = '';
+				el.style.transition      = '';
 				el.style.transformOrigin = '';
 			});
 
@@ -263,6 +268,7 @@
 				if (defaultImg && scrolledImg) {
 					const wrapperParent = this.logoWrapper.parentElement;
 					defaultImg.classList.remove('mk-em-logo-default');
+					defaultImg.style.transition = '';
 					scrolledImg.remove();
 					wrapperParent.insertBefore(defaultImg, this.logoWrapper);
 					this.logoWrapper.remove();
@@ -286,37 +292,65 @@
 
 	// ── Bootstrap ─────────────────────────────────────────────────
 
-	function initStickyHeaders() {
-		document.querySelectorAll('.e-con[data-settings]').forEach(function(container) {
-			if (container.__mkEmInit) return;
+	function initContainer(container) {
+		if (container.__mkEmInit) return;
 
-			let settings = {};
-			try {
-				settings = JSON.parse(container.dataset.settings);
-			} catch (e) {
-				return;
+		let settings = {};
+		try {
+			settings = JSON.parse(container.dataset.settings || '{}');
+		} catch (e) {
+			return;
+		}
+
+		if (settings.mk_em_sticky_enable !== 'yes') return;
+
+		container.__mkEmInit    = true;
+		container.__mkEmHandler = new StickyHeaderHandler(container, settings);
+
+		container.addEventListener('elementor/destroyed', function() {
+			if (container.__mkEmHandler) {
+				container.__mkEmHandler.destroy();
+				container.__mkEmInit = false;
 			}
-
-			if (settings.mk_em_sticky_enable !== 'yes') return;
-
-			container.__mkEmInit    = true;
-			container.__mkEmHandler = new StickyHeaderHandler(container, settings);
-
-			container.addEventListener('elementor/destroyed', function() {
-				if (container.__mkEmHandler) {
-					container.__mkEmHandler.destroy();
-					container.__mkEmInit = false;
-				}
-			});
 		});
 	}
 
+	function initStickyHeaders() {
+		document.querySelectorAll('.e-con[data-settings]').forEach(initContainer);
+	}
+
+	// Initial scan
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', initStickyHeaders);
 	} else {
 		initStickyHeaders();
 	}
-
 	window.addEventListener('load', initStickyHeaders);
+
+	// Watch for containers added/replaced by Elementor editor re-renders
+	if (typeof MutationObserver !== 'undefined') {
+		const domObserver = new MutationObserver(function(mutations) {
+			mutations.forEach(function(mutation) {
+				mutation.addedNodes.forEach(function(node) {
+					if (node.nodeType !== 1) return;
+					if (node.matches && node.matches('.e-con[data-settings]')) {
+						initContainer(node);
+					}
+					if (node.querySelectorAll) {
+						node.querySelectorAll('.e-con[data-settings]').forEach(initContainer);
+					}
+				});
+			});
+		});
+
+		// Start observing once the body is available
+		if (document.body) {
+			domObserver.observe(document.body, { childList: true, subtree: true });
+		} else {
+			document.addEventListener('DOMContentLoaded', function() {
+				domObserver.observe(document.body, { childList: true, subtree: true });
+			});
+		}
+	}
 
 })();
