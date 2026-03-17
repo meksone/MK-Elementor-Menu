@@ -203,31 +203,31 @@ class Sticky_Header {
 		$element->add_control(
 			'mk_em_scrolled_logo_fit',
 			[
-				'label'              => esc_html__( 'Scrolled Logo Fit', 'mk-elementor-menu' ),
-				'type'               => Controls_Manager::SELECT,
-				'options'            => [
+				'label'      => esc_html__( 'Scrolled Logo Fit', 'mk-elementor-menu' ),
+				'type'       => Controls_Manager::SELECT,
+				'options'    => [
 					'contain'    => esc_html__( 'Contain', 'mk-elementor-menu' ),
 					'cover'      => esc_html__( 'Cover', 'mk-elementor-menu' ),
 					'fill'       => esc_html__( 'Fill', 'mk-elementor-menu' ),
 					'scale-down' => esc_html__( 'Scale Down', 'mk-elementor-menu' ),
 					'none'       => esc_html__( 'None (natural size)', 'mk-elementor-menu' ),
 				],
-				'default'            => 'contain',
-				'condition'          => [
+				'default'    => 'contain',
+				'condition'  => [
 					'mk_em_sticky_enable'  => 'yes',
 					'mk_em_scrolled_logo!' => '',
 				],
-				'render_type'        => 'none',
-				'frontend_available' => true,
+				'render_type' => 'none',
+				'selectors'  => [ '{{WRAPPER}} .mk-em-logo-scrolled' => 'object-fit: {{VALUE}};' ],
 			]
 		);
 
 		$element->add_control(
 			'mk_em_scrolled_logo_position',
 			[
-				'label'              => esc_html__( 'Scrolled Logo Position', 'mk-elementor-menu' ),
-				'type'               => Controls_Manager::SELECT,
-				'options'            => [
+				'label'      => esc_html__( 'Scrolled Logo Position', 'mk-elementor-menu' ),
+				'type'       => Controls_Manager::SELECT,
+				'options'    => [
 					'left top'      => esc_html__( 'Left Top', 'mk-elementor-menu' ),
 					'left center'   => esc_html__( 'Left Center', 'mk-elementor-menu' ),
 					'left bottom'   => esc_html__( 'Left Bottom', 'mk-elementor-menu' ),
@@ -238,13 +238,13 @@ class Sticky_Header {
 					'right center'  => esc_html__( 'Right Center', 'mk-elementor-menu' ),
 					'right bottom'  => esc_html__( 'Right Bottom', 'mk-elementor-menu' ),
 				],
-				'default'            => 'left center',
-				'condition'          => [
+				'default'    => 'left center',
+				'condition'  => [
 					'mk_em_sticky_enable'  => 'yes',
 					'mk_em_scrolled_logo!' => '',
 				],
-				'render_type'        => 'none',
-				'frontend_available' => true,
+				'render_type' => 'none',
+				'selectors'  => [ '{{WRAPPER}} .mk-em-logo-scrolled' => 'object-position: {{VALUE}};' ],
 			]
 		);
 

@@ -181,11 +181,6 @@
 			scrolledImg.setAttribute('aria-hidden', 'true');
 			scrolledImg.style.transition = 'opacity ' + this._transitionDur + 'ms ease, transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
 
-			// Always apply with explicit fallbacks — Elementor omits frontend_available
-			// values from data-settings when they equal the control default.
-			scrolledImg.style.objectFit      = this.settings.mk_em_scrolled_logo_fit      || 'contain';
-			scrolledImg.style.objectPosition = this.settings.mk_em_scrolled_logo_position || 'left center';
-
 			originalParent.insertBefore(this.logoWrapper, defaultImg);
 			this.logoWrapper.appendChild(defaultImg);
 			this.logoWrapper.appendChild(scrolledImg);

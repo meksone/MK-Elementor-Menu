@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.11] - 2026-03-17
+
+### Fixed
+- `object-fit` and `object-position` not applying to scrolled logo: removed fragile JS inline assignment (which relied on `data-settings` serialization — broken when value equals control default or when Elementor skips `frontend_available` for `render_type:none` controls); replaced with Elementor `selectors` output targeting `.mk-em-logo-scrolled` directly; CSS default values (`contain` / `left center`) in `sticky-header.css` cover the case where Elementor skips outputting the default
+
 ## [0.1.10] - 2026-03-17
 
 ### Fixed

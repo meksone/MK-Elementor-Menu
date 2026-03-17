@@ -1,3 +1,8 @@
+<h4>0.1.11 — 2026-03-17</h4>
+<ul>
+    <li><strong>Fixed:</strong> <code>object-fit</code> and <code>object-position</code> not applying to the scrolled logo — removed fragile JS inline assignment that read from <code>data-settings</code> (unreliable when value equals the control default); replaced with Elementor <code>selectors</code> output targeting <code>.mk-em-logo-scrolled</code> directly; CSS defaults in <code>sticky-header.css</code> cover the case where Elementor skips outputting the default value.</li>
+</ul>
+
 <h4>0.1.10 — 2026-03-17</h4>
 <ul>
     <li><strong>Fixed:</strong> <code>object-position</code> not reflected on frontend — replaced stale module-level <code>IS_EDITOR</code> constant (evaluated before Elementor's frontend was ready) with the documented <code>$(window).on('elementor/frontend/init')</code> + <code>elementorFrontend.hooks.addAction('frontend/element_ready/global')</code> pattern; <code>isEditor</code> is now resolved reliably inside the callback and passed through the entire call chain.</li>
