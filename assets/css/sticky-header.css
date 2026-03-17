@@ -40,11 +40,10 @@
 .mk-em-logo-scrolled {
 	position: absolute;
 	top: 0;
+	bottom: 0;
 	left: 0;
 	width: var(--mk-em-scrolled-logo-width, 100%);
-	height: 100%;
-	object-fit: var(--mk-em-logo-fit, contain);
-	object-position: var(--mk-em-logo-position, left center);
+	/* object-fit and object-position are always applied as inline styles by JS */
 }
 
 /* Fade */
