@@ -83,11 +83,18 @@
 		_watchSettings() {
 			if (typeof MutationObserver === 'undefined') return;
 			const isEditor = this._isEditor;
-			this._attrObserver = new MutationObserver(() => {
-				const el = this.element;
-				this.destroy();
-				el.__mkEmInit = false;
-				initContainer(el, isEditor);
+			let rafHandle = null;
+
+			this._attrObserver = new MutationObserver((mutations) => {
+				// Use requestAnimationFrame to ensure the DOM is updated
+				// and Elementor has finished updating the data-settings attribute
+				if (rafHandle) cancelAnimationFrame(rafHandle);
+				rafHandle = requestAnimationFrame(() => {
+					const el = this.element;
+					this.destroy();
+					el.__mkEmInit = false;
+					initContainer(el, isEditor);
+				});
 			});
 			this._attrObserver.observe(this.element, {
 				attributes:      true,
@@ -143,12 +150,24 @@
 			let targets = [];
 			const selectorRaw = (this.settings.mk_em_logo_selector || '').trim();
 			if (selectorRaw) {
-				const selector = selectorRaw.startsWith('.') ? selectorRaw : '.' + selectorRaw;
+				const selector = (selectorRaw.startsWith('.') || selectorRaw.startsWith('#'))
+					? selectorRaw
+					: '.' + selectorRaw;
 				targets = Array.from(this.element.querySelectorAll(selector));
 			}
 			if (!targets.length) {
-				const fallback = this.element.querySelector('.elementor-widget-image');
-				if (fallback) targets = [fallback];
+				const fallbacks = [
+					'.elementor-widget-image',
+					'.elementor-widget-theme-site-logo',
+					'.elementor-widget-image-box'
+				];
+				for (const selector of fallbacks) {
+					const found = this.element.querySelector(selector);
+					if (found) {
+						targets = [found];
+						break;
+					}
+				}
 			}
 			targets.forEach(el => {
 				el.classList.add('mk-em-shrink-target');
@@ -161,9 +180,34 @@
 		// ── Logo swap ─────────────────────────────────────────────
 
 		_setupLogoSwap() {
-			const imageWidget = this.element.querySelector('.elementor-widget-image');
-			if (!imageWidget) return;
-			const defaultImg = imageWidget.querySelector('img');
+			let logoContainer = null;
+			const selectorRaw = (this.settings.mk_em_logo_selector || '').trim();
+
+			if (selectorRaw) {
+				const selector = (selectorRaw.startsWith('.') || selectorRaw.startsWith('#'))
+					? selectorRaw
+					: '.' + selectorRaw;
+				logoContainer  = this.element.querySelector(selector);
+			}
+
+			if (!logoContainer) {
+				const fallbacks = [
+					'.elementor-widget-image',
+					'.elementor-widget-theme-site-logo',
+					'.elementor-widget-image-box'
+				];
+				for (const selector of fallbacks) {
+					const found = this.element.querySelector(selector);
+					if (found) {
+						logoContainer = found;
+						break;
+					}
+				}
+			}
+
+			if (!logoContainer) return;
+
+			const defaultImg = logoContainer.tagName === 'IMG' ? logoContainer : logoContainer.querySelector('img');
 			if (!defaultImg) return;
 
 			const originalParent = defaultImg.parentElement;
@@ -181,14 +225,15 @@
 			scrolledImg.setAttribute('aria-hidden', 'true');
 			scrolledImg.style.transition = 'opacity ' + this._transitionDur + 'ms ease, transform ' + this._transitionDur + 'ms cubic-bezier(0.4,0,0.2,1)';
 
-			// Apply only when the value is explicitly present in data-settings
-			// (Elementor omits default values from data-settings, so the CSS var()
-			// fallback in sticky-header.css handles those cases).
-			if (this.settings.mk_em_scrolled_logo_fit) {
-				scrolledImg.style.objectFit = this.settings.mk_em_scrolled_logo_fit;
+			// Apply only when the value is explicitly present in data-settings.
+			// Elementor omits default values from data-settings, so check both properties.
+			const fit = this.settings.mk_em_scrolled_logo_fit;
+			if (fit && fit !== '') {
+				scrolledImg.style.objectFit = fit;
 			}
-			if (this.settings.mk_em_scrolled_logo_position) {
-				scrolledImg.style.objectPosition = this.settings.mk_em_scrolled_logo_position;
+			const pos = this.settings.mk_em_scrolled_logo_position;
+			if (pos && pos !== '') {
+				scrolledImg.style.objectPosition = pos;
 			}
 
 			originalParent.insertBefore(this.logoWrapper, defaultImg);
