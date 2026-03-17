@@ -219,7 +219,6 @@ class Sticky_Header {
 				],
 				'render_type'        => 'none',
 				'frontend_available' => true,
-				'selectors'          => [ '{{WRAPPER}}' => '--mk-em-logo-fit: {{VALUE}};' ],
 			]
 		);
 
@@ -246,7 +245,6 @@ class Sticky_Header {
 				],
 				'render_type'        => 'none',
 				'frontend_available' => true,
-				'selectors'          => [ '{{WRAPPER}}' => '--mk-em-logo-position: {{VALUE}};' ],
 			]
 		);
 

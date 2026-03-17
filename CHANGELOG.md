@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.14] - 2026-03-17
+
+### Fixed
+- `object-fit` / `object-position` still not applying on scrolled logo — two root causes addressed:
+  1. **Box height not constrained**: `.mk-em-logo-scrolled` used `height: 100%` on a `position: absolute` child of a `display: inline-block` parent with no explicit height; by CSS spec this can resolve to `auto`, meaning the image renders at its natural size and `object-fit` has no visible effect — replaced with `top: 0; bottom: 0` which reliably stretches the image to the parent's computed height via offset constraint instead of a percentage
+  2. **Default values silently dropped**: the conditional `if (settings.mk_em_scrolled_logo_fit)` was falsy whenever Elementor omitted the default value from `data-settings` (even with `frontend_available: true`, Elementor can skip serialising values equal to the control default) — replaced with an unconditional assignment using JS-side fallback defaults (`'contain'` / `'left center'`) that match the PHP control defaults
+- Removed `selectors` from `mk_em_scrolled_logo_fit` and `mk_em_scrolled_logo_position` — CSS custom-property output is no longer needed since JS always applies the values as inline styles (which take precedence over any CSS anyway)
+
 ## [0.1.13] - 2026-03-17
 
 ### Fixed
